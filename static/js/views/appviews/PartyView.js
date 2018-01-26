@@ -6,11 +6,15 @@
  *                                         *
  * * * * * * * * * * * * * * * * * * * * * */
 
+import { JSONParsedPostRequest } from '../../utils/Utils.js'
+import Notification from '../../utils/Notification.js'
+import Track from '../../core/Track.js'
+import View from '../../core/View.js'
+
 class PartyView extends View {
 
     constructor() {
         super();
-        this.isEnabled = false;
         this._createUI();
         this._eventListener();
     }
@@ -27,7 +31,7 @@ class PartyView extends View {
 
         let that = this;
         JSONParsedPostRequest(
-            "ajax/getTracksDetailedInfo/",
+            "track/getDetailedInfo/",
             JSON.stringify({
                 TRACK_ID: [window.app.player.getSourceID()]
             }),
@@ -37,7 +41,42 @@ class PartyView extends View {
                  *     ERROR_H1  : string
                  *     ERROR_MSG : string
                  *
-                 *     RESULT    : JSON object
+                 *     RESULT    : {
+                 *         ID:
+                 *         TITLE:
+                 *         YEAR:
+                 *         COMPOSER:
+                 *         PERFORMER:
+                 *         TRACK_NUMBER:
+                 *         BPM:
+                 *         LYRICS:
+                 *         COMMENT:
+                 *         BITRATE:
+                 *         SAMPLERATE:
+                 *         DURATION:
+                 *         GENRE:
+                 *         FILE_TYPE:
+                 *         DISC_NUMBER:
+                 *         SIZE:
+                 *         LAST_MODIFIED:
+                 *         COVER:
+                 *         ARTISTS: {
+                 *            ID:
+                 *            NAME:
+                 *         }
+                 *         ALBUM: {
+                 *             ID:
+                 *             TITLE:
+                 *             TOTAL_DISC:
+                 *             TOTAL_TRACK:
+                 *             ARTISTS: {
+                 *                 ID:
+                 *                 NAME:
+                 *             }
+                 *         }
+                 *         PLAY_COUNTER:
+                 *         FILE_NAME:
+                 *     }
                  * } */
                 if (response.DONE) {
                     that._setCurrentTrack(new Track(response.RESULT[0]));
@@ -144,8 +183,6 @@ class PartyView extends View {
     _eventListener() {
         let that = this;
         this.ui.close.addEventListener("click", function() {
-            document.body.removeChild(that.ui.container);
-            that.isEnabled = false;
             window.app.restorePageContent();
         });
         this.ui.play.addEventListener("click", function() {
@@ -190,7 +227,6 @@ class PartyView extends View {
 
 //  ------------------------------  GETTERS / SETTERS  --------------------------------  //
 
-    getIsEnabled()       { return this.isEnabled;    }
-    setIsEnabled(enabled) { this.isEnabled = enabled; }
-
 }
+
+export default PartyView

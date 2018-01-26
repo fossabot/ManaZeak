@@ -6,47 +6,9 @@
  *                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-class EditTagEntry {
-
-    constructor(container, track) {
-        this.entry                 = document.createElement("P");
-        this.track                 = track;
-        this.entry.innerHTML       = track.fileName;
-        this.entry.dataset.childID = container.children.length;
-
-        container.appendChild(this.entry);
-    }
-
-//  --------------------------------  PUBLIC METHODS  ---------------------------------  //
-
-    /**
-     * method : setIsSelected (public)
-     * class  : ListViewEntry
-     * desc   : Set the entry as selected/!selected
-     * return : {bool} isSelected
-     **/
-    setIsSelected(isSelected) {
-        this.isSelected = isSelected;
-
-        if (this.isSelected) {
-            this.entry.classList.add("mzk-selected");
-        }
-
-        else {
-            this.entry.classList.remove("mzk-selected");
-        }
-    }
-
-}
-
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                 *
- *  EditTag class                                  *
- *                                                 *
- *  Handle the edit tag modal                      *
- *                                                 *
- * * * * * * * * * * * * * * * * * * * * * * * * * */
+import { secondsToTimecode, JSONParsedPostRequest, rawSizeToReadableSize } from '../utils/Utils.js'
+import MultiSelect from '../utils/MultiSelect.js'
+import EditTagEntry from './entries/EditTagEntry.js'
 
 class EditTag {
 
@@ -72,15 +34,18 @@ class EditTag {
      **/
     saveState() {
         let send = [];
+        let tracks = [];
 
         if (this.data.length > 1) {
             for (let i = 0; i < this.selector.get().length ;++i) {
                 send.push(this.entries[this.selector.get()[i]].track.id.track);
+                tracks.push(this.entries[this.selector.get()[i]].track);
             }
         }
 
         else { // One track to edit
             send.push(this.data[0].id.track);
+            tracks.push(this.data[0]);
         }
 
         let reqArgs = { TRACKS_ID: send };
@@ -100,22 +65,25 @@ class EditTag {
             ARTISTS:           this.ui.cArtistInput.value,
             ALBUM_ARTISTS:     this.ui.tagAlbumArtistsField.value
         };
-        for(let f in fields)
-            if(fields[f] != this.keepStr)
+
+        for (let f in fields) {
+            if (fields[f] != this.keepStr) {
                 reqArgs[f] = fields[f];
+            }
+        }
 
         JSONParsedPostRequest(
-            "ajax/changeTracksMetadata/",
+            "track/changeMetadata/",
             JSON.stringify(reqArgs),
             function(response) {
                 /* response = {
                  *     DONE      : bool
                  *     ERROR_H1  : string
                  *     ERROR_MSG : string
-                 *
-                 *     PATH      : string
                  * } */
-                if (!response.DONE) {
+                if (response.DONE) {
+                    window.app.updateTracksInfo(tracks);
+                } else {
                     new Notification("ERROR", response.ERROR_H1, response.ERROR_MSG);
                 }
             }
@@ -135,18 +103,18 @@ class EditTag {
         this._uiSetVar();
         this._uiAppendVar();
 
-        if (this.data.length > 1) {
-            this.entries = new Array(this.data.length);
+        this.entries = new Array(this.data.length);
 
-            for (let i = 0; i < this.data.length ;++i) {
-                this.entries[i] = new EditTagEntry(this.ui.list, this.data[i]);
-            }
+        for (let i = 0; i < this.data.length ;++i) {
+            this.entries[i] = new EditTagEntry(this.ui.list, this.data[i]);
+        }
 
+        if(this.data.length > 1) {
             container.style = "display: flex;";
             container.appendChild(this.ui.list);
             this.ui.container.style += "display: inline;";
-            this.entries[0].setIsSelected(true);
         }
+        this.entries[0].setIsSelected(true);
 
         container.appendChild(this.ui.container);
     }
@@ -432,15 +400,15 @@ class EditTag {
             albumArtist: ''
         };
 
-        if(tracks[0])
-        {
+        if (tracks[0]) {
             tmp = this.entries[tracks[0]].track;
 
-            for(let f in fields)
+            for (let f in fields) {
                 fields[f] = tmp[f];
+            }
 
             //Show these infos when there is only one track selected;
-            if(tracks.length == 1) {
+            if (tracks.length == 1) {
                 this.ui.lineOne.innerHTML = secondsToTimecode(tmp.duration) + " - " +
                                             rawSizeToReadableSize(tmp.size) + " - " +
                                             tmp.fileType + " - " +
@@ -490,3 +458,5 @@ class EditTag {
     getContainer() { return this.ui.container; }
 
 }
+
+export default EditTag

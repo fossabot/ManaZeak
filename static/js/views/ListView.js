@@ -1,127 +1,18 @@
 /* * * * * * * * * * * * * * * * * * * * * *
  *                                         *
- *  ListViewEntry sub class                *
- *                                         *
- *  A list view entry                      *
- *                                         *
- * * * * * * * * * * * * * * * * * * * * * */
-
-class ListViewEntry {
-
-    constructor(track, listView) {
-        this.track           = track;
-        this.isSelected      = false;
-
-        this.entry           = document.createElement("DIV");
-        let duration         = document.createElement("DIV");
-        let title            = document.createElement("DIV");
-        let artist           = document.createElement("DIV");
-        let composer         = document.createElement("DIV");
-        let performer        = document.createElement("DIV");
-        let album            = document.createElement("DIV");
-        let genre            = document.createElement("DIV");
-        let bitRate          = document.createElement("DIV");
-        let year             = document.createElement("DIV");
-
-        this.entry.className = "trackContainer";
-        duration.className   = "col-duration";
-        title.className      = "col-title";
-        artist.className     = "col-artist";
-        composer.className   = "col-composer";
-        performer.className  = "col-performer";
-        album.className      = "col-album";
-        genre.className      = "col-genre";
-        bitRate.className    = "col-bitRate";
-        year.className       = "col-year";
-        duration.innerHTML   = secondsToTimecode(track.duration);
-        title.innerHTML      = track.title;
-        artist.innerHTML     = track.artist;
-        composer.innerHTML   = track.composer;
-        performer.innerHTML  = track.performer;
-        album.innerHTML      = track.album;
-        genre.innerHTML      = track.genre;
-        bitRate.innerHTML    = Math.round(track.bitRate / 1000) + " kbps";
-        year.innerHTML       = track.year;
-
-        this.entry.appendChild(duration);
-        this.entry.appendChild(title);
-        this.entry.appendChild(artist);
-        this.entry.appendChild(composer);
-        //this.entry.appendChild(performer);
-        this.entry.appendChild(album);
-        this.entry.appendChild(genre);
-        this.entry.appendChild(bitRate);
-        this.entry.appendChild(year);
-
-        this.insert(listView);
-    }
-
-//  --------------------------------  PUBLIC METHODS  ---------------------------------  //
-
-    /**
-     * method : insert (public)
-     * class  : ListViewEntry
-     * desc   : Insert the entry in the list
-     * return : {object} listView - The HTML container
-     **/
-    insert(listView) {
-        this.entry.dataset.childID = listView.children.length;
-
-        if (this.entry.dataset.childID % 2 === 0) {
-            this.entry.classList.add("evenLin");
-        }
-
-        listView.appendChild(this.entry);
-    }
-
-
-    /**
-     * method : setBackground (public)
-     * class  : ListViewEntry
-     * desc   : Change entry BG color if seed is even
-     * arg    : {int} seed - The value to test is even
-     **/
-    setBackground(seed) {
-        this.entry.classList.remove("evenLin");
-
-        if (seed % 2 === 0) {
-            this.entry.classList.add("evenLin");
-        }
-    }
-
-
-    /**
-     * method : setIsSelected (public)
-     * class  : ListViewEntry
-     * desc   : Set the entry as selected/!selected
-     * return : {bool} isSelected
-     **/
-    setIsSelected(isSelected) {
-        this.isSelected = isSelected;
-
-        if (this.isSelected) {
-            this.entry.classList.add("mzk-selected");
-        }
-
-        else {
-            this.entry.classList.remove("mzk-selected");
-        }
-    }
-
-//  ------------------------------  GETTERS / SETTERS  --------------------------------  //
-
-    getIsSelected() { return this.isSelected; }
-
-}
-
-
-/* * * * * * * * * * * * * * * * * * * * * *
- *                                         *
  *  ListView class                         *
  *                                         *
  *  Classical list view                    *
  *                                         *
  * * * * * * * * * * * * * * * * * * * * * */
+
+import { JSONParsedPostRequest, sortObjectArrayBy } from '../utils/Utils.js'
+import ListViewEntry from './entries/ListViewEntry.js'
+import PlaylistView from '../core/PlaylistView.js'
+import MultiSelect from '../utils/MultiSelect.js'
+import TrackInfo from '../components/elements/TrackInfo.js'
+import ContextMenu from '../utils/ContextMenu.js'
+import Modal from '../utils/Modal.js'
 
 class ListView extends PlaylistView {
 
@@ -323,44 +214,17 @@ class ListView extends PlaylistView {
             }
         });
 
-        //TODO: move to App
         this.contextMenu.addEntry(null, "Edit tags", function() {
             let ids          = that.selector.get();
-            let tracksID     = new Array(ids.length);
             let tracks       = new Array(ids.length);
 
             for(let i = 0; i < ids.length; ++i) {
-                tracksID[i]  = that.entries[ids[i]].track.id.track;
                 tracks[i]    = that.entries[ids[i]].track;
             }
 
-            JSONParsedPostRequest(
-                "ajax/getTracksDetailedInfo/",
-                JSON.stringify({
-                    TRACK_ID: tracksID
-                }),
-                function(response) {
-                    /* response = {
-                     *     DONE      : bool
-                     *     ERROR_H1  : string
-                     *     ERROR_MSG : string
-                     *
-                     *     RESULT    : JSON object
-                     * } */
-                    if (response.DONE) {
-                        for (let i = 0; i < response.RESULT.length ;++i) {
-                            that.entries[ids[i]].track.updateMetadata(response.RESULT[i]);
-                        }
-
-                        let tmp = new Modal("editTag", tracks);
-                        tmp.open();
-                    }
-
-                    else {
-                        new Notification("ERROR", response.ERROR_H1, response.ERROR_MSG);
-                    }
-                }
-            );
+            window.app.updateTracksInfo(tracks, function() {
+                new Modal("editTag", tracks).open();
+            })
         });
 
         this.contextMenu.addEntry(null, "Download track", function() {
@@ -411,13 +275,18 @@ class ListView extends PlaylistView {
      * desc   : Build UI elements
      **/
     _createUI(data) {
-        this.listView       = document.createElement("DIV");
-        this.listView.id    ="listView";
+        this.listView               = document.createElement("DIV");
+        this.listView.id            = "listView";
+        this.container.id           = "listViewWrapper";
 
         this._initHeader();
         this._addEntries(data);
         this.container.appendChild(this.header.container);
         this.container.appendChild(this.listView);
+
+        if (this.entries.length * 26 > screen.height) { // TODO : Value to adjust
+            this.header.container.classList.add("columnHeaderOffset");
+        }
 
         this.trackInfo      = new TrackInfo(this.container);
         this.hoveredTrack   = null;
@@ -532,7 +401,6 @@ class ListView extends PlaylistView {
         this.header.title                    = document.createElement("DIV");
         this.header.artist                   = document.createElement("DIV");
         this.header.composer                 = document.createElement("DIV");
-        this.header.performer                = document.createElement("DIV");
         this.header.album                    = document.createElement("DIV");
         this.header.genre                    = document.createElement("DIV");
         this.header.bitRate                  = document.createElement("DIV");
@@ -543,7 +411,6 @@ class ListView extends PlaylistView {
         this.header.title.className          = "col-title";
         this.header.artist.className         = "col-artist";
         this.header.composer.className       = "col-composer";
-        this.header.performer.className      = "col-performer";
         this.header.album.className          = "col-album";
         this.header.genre.className          = "col-genre";
         this.header.bitRate.className        = "col-bitRate";
@@ -552,7 +419,6 @@ class ListView extends PlaylistView {
         this.header.title.innerHTML          = "Title";
         this.header.artist.innerHTML         = "Artist";
         this.header.composer.innerHTML       = "Composer";
-        this.header.performer.innerHTML      = "Performer";
         this.header.album.innerHTML          = "Album";
         this.header.genre.innerHTML          = "Genre";
         this.header.bitRate.innerHTML        = "BitRate";
@@ -561,7 +427,6 @@ class ListView extends PlaylistView {
         this.header.title.dataset.sorter     = "title";
         this.header.artist.dataset.sorter    = "artist";
         this.header.composer.dataset.sorter  = "composer";
-        this.header.performer.dataset.sorter = "performer";
         this.header.album.dataset.sorter     = "album";
         this.header.genre.dataset.sorter     = "genre";
         this.header.bitRate.dataset.sorter   = "bitRate";
@@ -571,7 +436,6 @@ class ListView extends PlaylistView {
         this.header.container.appendChild(this.header.title);
         this.header.container.appendChild(this.header.artist);
         this.header.container.appendChild(this.header.composer);
-        //this.header.container.appendChild(this.header.performer);
         this.header.container.appendChild(this.header.album);
         this.header.container.appendChild(this.header.genre);
         this.header.container.appendChild(this.header.bitRate);
@@ -731,3 +595,5 @@ class ListView extends PlaylistView {
     }
 
 }
+
+export default ListView

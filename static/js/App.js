@@ -6,6 +6,26 @@
  *                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+import { getCookies, JSONParsedGetRequest, JSONParsedPostRequest, getRequest } from './utils/Utils.js'
+import FootBar  from './components/FootBar.js'
+import MzkObject from './core/MzkObject.js'
+import TopBar   from './components/TopBar.js'
+import User     from './core/User.js'
+import DragDrop from './components/DragDrop.js'
+import PlaylistCollection from './core/PlaylistCollection.js'
+import ShortcutMaestro from './utils/ShortcutMaestro.js'
+import Shortcut from './utils/Shortcut.js'
+import Queue    from './core/Queue.js'
+import Player   from './core/Player.js'
+import StatsView from './views/appviews/StatsView.js'
+import AdminView from './views/appviews/AdminView.js'
+import UserView from './views/appviews/UserView.js'
+import PartyView from './views/appviews/PartyView.js'
+import ListView from './views/ListView.js'
+import Playlist from './core/Playlist.js'
+import Notification from './utils/Notification.js'
+import Modal from './utils/Modal.js'
+
 class App extends MzkObject {
 
     constructor() {
@@ -35,6 +55,7 @@ class App extends MzkObject {
             }
         };
         document.body.appendChild(this.mainContainer);
+        this._consoleWelcome();
     }
 
 //  --------------------------------  PUBLIC METHODS  ---------------------------------  //
@@ -55,18 +76,16 @@ class App extends MzkObject {
         }
 
         JSONParsedPostRequest(
-            "ajax/addTracksToPlaylist/",
+            "playlist/addTracks/",
             JSON.stringify({
                 PLAYLIST_ID: playlist.id,
-                TRACKS_ID: ids
+                TRACKS_ID:   ids
             }),
-            function (response) {
+            (response) => {
                 /* response = {
                  *     DONE         : bool
                  *     ERROR_H1     : string
                  *     ERROR_MSG    : string
-                 *
-                 *     ADDED_TRACKS : int
                  * } */
                 if (response.DONE) {
                     new Notification("INFO", "Tracks added to " + playlist.name, names + " have been added to " + playlist.name + ".");
@@ -165,12 +184,12 @@ class App extends MzkObject {
 
         let duration_played = (this.player.getCurrentTime() * 100) / this.player.getDuration();
         JSONParsedPostRequest(
-            "ajax/getTrackPathByID/",
+            "track/getPath/",
             JSON.stringify({
-                TRACK_ID:        track.id.track,
-                LAST_TRACK_PATH: lastTrackPath,
-                TRACK_PER:       isNaN(duration_played) ? 0 : duration_played,
-                PREVIOUS:        previous
+                TRACK_ID:         track.id.track,
+                LAST_TRACK_PATH:  lastTrackPath,
+                TRACK_PERCENTAGE: isNaN(duration_played) ? 0 : duration_played,
+                PREVIOUS:         previous
             }),
             function(response) {
                 /* response = {
@@ -178,11 +197,11 @@ class App extends MzkObject {
                  *     ERROR_H1    : string
                  *     ERROR_MSG   : string
                  *
-                 *     PATH        : string
+                 *     TRACK_PATH  : string
                  * } */
                 if (response.DONE) {
-                    that.player.changeSource(".." + response.PATH, track.id.track);
-                    that.changePageTitle(response.PATH);
+                    that.player.changeSource(".." + response.TRACK_PATH, track.id.track);
+                    that.changePageTitle(response.TRACK_PATH);
                     that.activePlaylist.setCurrentTrack(track);
                     that.togglePlay();
                 }
@@ -196,7 +215,6 @@ class App extends MzkObject {
         return true;
     }
 
-
     /**
      * method : changeView (public)
      * class  : App
@@ -204,14 +222,14 @@ class App extends MzkObject {
      * arg    : {object} view - The view to set
      **/
     changeView(view) {
-        if (view.getContainer().id === "party") {
-            view.setIsEnabled(true);
-            document.body.appendChild(view.getContainer());
+        for (let i = 0; i < this.mainContainer.children.length; ++i) {
+            this.mainContainer.children[i].classList.add('mzk-view-hide');
         }
 
-        else {
-            this.mainContainer.innerHTML = '';
-            this.mainContainer.appendChild(view.getContainer());
+        let container = view.getContainer();
+        container.classList.remove('mzk-view-hide');
+        if (container.parentNode != this.mainContainer) {
+            this.mainContainer.appendChild(container);
         }
     }
 
@@ -245,17 +263,15 @@ class App extends MzkObject {
     deletePlaylist(playlist, callback) {
         let that = this;
         JSONParsedPostRequest(
-            "ajax/deleteCollection/",
+            "collection/delete/",
             JSON.stringify({
-                ID: playlist.id
+                PLAYLIST_ID: playlist.id
             }),
             function(response) {
                 /* response = {
                  *     DONE        : bool
                  *     ERROR_H1    : string
                  *     ERROR_MSG   : string
-                 *
-                 *     PATH        : string
                  * } */
                 if (response.DONE) {
                     that.playlists.remove(playlist.id);
@@ -291,7 +307,7 @@ class App extends MzkObject {
      **/
     deleteUser(id, callback) {
         JSONParsedPostRequest(
-            "ajax/removeUserById/",
+            "admin/removeUserById/",
             JSON.stringify({
                 USER_ID: id
             }),
@@ -321,22 +337,22 @@ class App extends MzkObject {
      **/
     downloadTrack(track) {
         JSONParsedPostRequest(
-            "ajax/download/",
+            "track/download/",
             JSON.stringify({
                 TRACK_ID: track.id.track
             }),
             function (response) {
                 /* response = {
-                 *     DONE      : bool
-                 *     ERROR_H1  : string
-                 *    ERROR_MSG : string
+                 *     DONE          : bool
+                 *     ERROR_H1      : string
+                 *     ERROR_MSG     : string
                  *
-                 *     PATH      : string
+                 *     DOWNLOAD_PATH : string
                  * } */
                 if (response.DONE) {
                     let dl      = document.createElement("A");
-                    dl.href     = response.PATH;
-                    dl.download = response.PATH.replace(/^.*[\\\/]/, '');
+                    dl.href     = response.DOWNLOAD_PATH;
+                    dl.download = response.DOWNLOAD_PATH.replace(/^.*[\\\/]/, '');
                     document.body.appendChild(dl);
                     dl.dispatchEvent(new MouseEvent('click', {bubbles: true}));
                     document.body.removeChild(dl);
@@ -365,22 +381,22 @@ class App extends MzkObject {
         }
 
         JSONParsedPostRequest(
-            "ajax/multiTrackDownload/",
+            "track/multiDownload/",
             JSON.stringify({
-                IDS: ids
+                TRACKS_ID: ids
             }),
             function (response) {
                 /* response = {
                  *     DONE      : bool
                  *     ERROR_H1  : string
-                 *    ERROR_MSG : string
+                 *     ERROR_MSG : string
                  *
-                 *     PATH      : string
+                 *     DOWNLOAD_PATH      : string
                  * } */
                 if (response.DONE) {
                     let dl      = document.createElement("A");
-                    dl.href     = response.PATH;
-                    dl.download = response.PATH.replace(/^.*[\\\/]/, '');
+                    dl.href     = response.DOWNLOAD_PATH;
+                    dl.download = response.DOWNLOAD_PATH.replace(/^.*[\\\/]/, '');
                     document.body.appendChild(dl);
                     dl.dispatchEvent(new MouseEvent('click', {bubbles: true}));
                     document.body.removeChild(dl);
@@ -468,15 +484,16 @@ class App extends MzkObject {
 
         let that = this;
         JSONParsedGetRequest( // Loading playlists
-            "ajax/getPlaylists/",
+            "playlist/fetchAll/",
             function(response) {
                 /* response = {
-                 *     DONE           : bool
-                 *     ERROR_H1       : string
-                 *     ERROR_MSG      : string
+                 *     DONE                : bool
+                 *     ERROR_H1            : string
+                 *     ERROR_MSG           : string
                  *
-                 *     PLAYLIST_IDS   : int[] / undefined
-                 *     PLAYLIST_NAMES : string[] / undefined
+                 *     PLAYLIST_IDS        : int[] / undefined
+                 *     PLAYLIST_NAMES      : string[] / undefined
+                 *     PLAYLIST_IS_LIBRARY : bool[] / undefined
                  * } */
                 that._appStart(response); // Response is tested in _appStart
             }
@@ -526,10 +543,6 @@ class App extends MzkObject {
      * desc   : Get next track
      **/
     next() {
-        if (this.appViews["mzk_party"].getIsEnabled()) {
-            return;
-        }
-
         if (this.queue.isEmpty() == false) {
             this.popQueue();
         }
@@ -598,19 +611,17 @@ class App extends MzkObject {
         }
 
         JSONParsedPostRequest(
-            "ajax/removeTrackFromPlaylist/",
+            "playlist/removeTracks/",
             JSON.stringify({
                 PLAYLIST_ID: playlist.id,
                 TRACKS_ID:   ids
             }),
             function (response) {
                 /* response = {
-                             *     DONE           : bool
-                             *     ERROR_H1       : string
-                             *     ERROR_MSG      : string
-                             *
-                             *     REMOVED_TRACKS : int
-                             * } */
+                 *     DONE           : bool
+                 *     ERROR_H1       : string
+                 *     ERROR_MSG      : string
+                 * } */
                 if (response.DONE) {
                     new Notification("INFO", "Tracks removed from " + playlist.name, names + " have been removed from " + playlist.name + ".");
                     playlist.getPlaylistsTracks();
@@ -633,21 +644,22 @@ class App extends MzkObject {
     renamePlaylist(id, name) {
         let that = this;
         JSONParsedPostRequest(
-            "ajax/renamePlaylist/",
+            "playlist/rename/",
             JSON.stringify({
-                PLAYLIST_ID: id,
-                NAME:        name
+                PLAYLIST_ID:   id,
+                PLAYLIST_NAME: name
             }),
             function(response) {
                 /* response = {
-                 *     DONE        : bool
-                 *     ERROR_H1    : string
-                 *     ERROR_MSG   : string
+                 *     DONE          : bool
+                 *     ERROR_H1      : string
+                 *     ERROR_MSG     : string
                  *
-                 *     PATH        : string
+                 *     PLAYLIST_ID   : string
+                 *     PLAYLIST_NAME : string
                  * } */
                 if (response.DONE) {
-                    that.playlists.rename(id, name);
+                    that.playlists.rename(response.PLAYLIST_ID, response.PLAYLIST_NAME);
                 }
 
                 else {
@@ -702,9 +714,7 @@ class App extends MzkObject {
      * desc   : Restore any content in mainContainer
      **/
     restorePageContent() {
-        removeInvisibilityLock(this.footBar.getFootBar());
-        removeInvisibilityLock(this.mainContainer);
-        removeInvisibilityLock(this.topBar.getTopBar());
+        this.activePlaylist.activate();
     }
 
 
@@ -860,6 +870,79 @@ class App extends MzkObject {
         this.player.unmute();
     }
 
+
+    /**
+     * method : updateTracksInfo (public)
+     * class  : App
+     * desc   : Update a track metadata
+     * arg    : {array}      tracks- The Track object that will be used for the update
+     *          {function} callback - The function to callback (not mandatory)
+     **/
+    updateTracksInfo(tracks, callback) {
+        let ids = new Array(tracks.length);
+        for(let i = 0; i < tracks.length; ++i)
+            ids[i] = tracks[i].id.track;
+        JSONParsedPostRequest(
+            "track/getDetailedInfo/",
+            JSON.stringify({
+                TRACK_ID: ids
+            }),
+            function(response) {
+                /* response = {
+                 *     DONE      : bool
+                 *     ERROR_H1  : string
+                 *     ERROR_MSG : string
+                 *
+                 *     RESULT    : {
+                 *         ID:
+                 *         TITLE:
+                 *         YEAR:
+                 *         COMPOSER:
+                 *         PERFORMER:
+                 *         TRACK_NUMBER:
+                 *         BPM:
+                 *         LYRICS:
+                 *         COMMENT:
+                 *         BITRATE:
+                 *         SAMPLERATE:
+                 *         DURATION:
+                 *         GENRE:
+                 *         FILE_TYPE:
+                 *         DISC_NUMBER:
+                 *         SIZE:
+                 *         LAST_MODIFIED:
+                 *         COVER:
+                 *         ARTISTS: {
+                 *            ID:
+                 *            NAME:
+                 *         }
+                 *         ALBUM: {
+                 *             ID:
+                 *             TITLE:
+                 *             TOTAL_DISC:
+                 *             TOTAL_TRACK:
+                 *             ARTISTS: {
+                 *                 ID:
+                 *                 NAME:
+                 *             }
+                 *         }
+                 *         PLAY_COUNTER:
+                 *         FILE_NAME:
+                 *     }
+                 * } */
+                if (response.DONE) {
+                    for(let i = 0; i < tracks.length; ++i)
+                        tracks[i].updateMetadata(response.RESULT[i]);
+                    if (callback) { callback(); }
+                }
+
+                else {
+                    new Notification("ERROR", response.ERROR_H1, response.ERROR_MSG);
+                }
+            }
+        );
+    }
+
 //  --------------------------------  PRIVATE METHODS  --------------------------------  //
 
 
@@ -905,6 +988,23 @@ class App extends MzkObject {
     }
 
 
+    _consoleWelcome() {
+        let cssRuleTitle  = "color: rgb(44, 44, 48);" +
+                            "font-size: 3em;" +
+                            "font-weight: bold;" +
+                            "margin: 20px 0;" +
+                            "text-shadow: 1px 1px 5px rgb(44, 44, 48);";
+        let cssRuleHidden = "color: rgb(255, 255, 255);";
+        setTimeout(console.log.bind(console, "%cManaZeak console", cssRuleTitle)); // Hiding source in console
+        setTimeout(console.log.bind(console, "Hello there!\n" +
+                                             "\nIf you don't know why you are here, you may close this window, and keep using ManaZeak." +
+                                             "\nOtherwise, keep in mind that using this console may result in a non working app, at least on your side. "));
+        setTimeout(console.log.bind(console, "%cCongratulation, you found the first key for the achievement TOAST. Here it is : ba6f7979ab2cb9096d050b7f850d50ff", cssRuleHidden));
+        setTimeout(console.log.bind(console, "To know more about ManaZeak, visit https://github.com/Squadella/ManaZeak"));
+        setTimeout(console.log.bind(console, "\n-----------"));
+    }
+
+
     /**
      * method : _createDefaultViews (private)
      * class  : App
@@ -938,3 +1038,5 @@ class App extends MzkObject {
     }
 
 }
+
+export default App

@@ -116,13 +116,11 @@ $RECYCLE.BIN/
 docker-compose.yml
 db_data
 
-
-static/audio
-static/audio2
-src/
-Output.txt
 *.mood
 *.o
 
 node_modules/
+static/js/dist/manazeak.bundle.js
 moodbar/moodbar-0.1.2
+
+/package-lock.json

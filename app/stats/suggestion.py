@@ -25,11 +25,11 @@ def getSimilarTrack(request):
     if request.method == 'POST':
         response = json.loads(request.body)
         selectedTracks = []
-        if 'TRACK_ID' in response and 'MODE' in response:
+        if 'TRACK_ID' in response and 'SUGGESTION_MODE' in response:
             trackId = strip_tags(response['TRACK_ID'])
             if Track.objects.filter(id=trackId).count() == 1:
                 track = Track.objects.get(id=trackId)
-                mode = strip_tags(response['MODE'])
+                mode = strip_tags(response['SUGGESTION_MODE'])
                 numberTrackTarget = 4
 
                 try:

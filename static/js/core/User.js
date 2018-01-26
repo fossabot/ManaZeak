@@ -6,6 +6,8 @@
  *                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+import { JSONParsedGetRequest } from '../utils/Utils.js'
+
 class User {
 
     constructor() {
@@ -26,7 +28,7 @@ class User {
     updateIsAdmin(callback) {
         let that = this;
         JSONParsedGetRequest(
-            "ajax/isAdmin/",
+            "admin/isAdmin/",
             function(response) {
                 /* response = {
                  *     DONE      : bool
@@ -60,16 +62,24 @@ class User {
     _getUserInfo() {
         let that = this;
         JSONParsedGetRequest(
-            "ajax/getUserSettings/",
+            "user/getSettings/",
             function(response) {
                 /* response = {
                  *     DONE      : bool
                  *     ERROR_H1  : string
                  *     ERROR_MSG : string
                  *
-                 *     IS_ADMIN  : bool
+                 *     USERNAME:
+                 *     DATE_JOINED:
+                 *     LAST_LOGIN:
+                 *     INVITE_CODE:
+                 *     IS_ADMIN:
+                 *     MANACOIN:
+                 *     GODFATHER_CODE:
+                 *     GODFATHER_NAME:
                  * } */
                 if (response.DONE) {
+                    // TODO : store all values
                     that.godFatherCode = response.GODFATHER_CODE;
                     that.inviteCode    = response.INVITE_CODE;
                 }
@@ -88,3 +98,5 @@ class User {
     getInviteCode() { return this.inviteCode; }
 
 }
+
+export default User

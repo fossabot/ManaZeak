@@ -6,6 +6,13 @@
  *                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+import { JSONParsedPostRequest, renderMoodFile, addVisibilityLock, removeVisibilityLock } from '../utils/Utils.js'
+import MzkObject from '../core/MzkObject.js'
+import PartyMode from './elements/topbar/PartyMode.js'
+import WishList from '../components/elements/topbar/WishList.js'
+import UserMenu from '../components/elements/topbar/UserMenu.js'
+import CollectionBar from '../components/elements/topbar/CollectionBar.js'
+
 class TopBar extends MzkObject {
 
     constructor() {
@@ -30,13 +37,20 @@ class TopBar extends MzkObject {
     changeMoodbar(id) {
         let that = this;
         JSONParsedPostRequest(
-            "ajax/getMoodbarByID/",
+            "track/getMoodbar/",
             JSON.stringify({
                 TRACK_ID: id
             }),
             function(response) {
+                /* response = {
+                 *     DONE        : bool
+                 *     ERROR_H1    : string
+                 *     ERROR_MSG   : string
+                 *
+                 *     TRACK_MOOD  : string
+                 * } */
                 let error = false;
-                renderMoodFile(response.MOOD, that.moodbar, function() { // Callback is here in case of 404 on the moodBar
+                renderMoodFile(response.TRACK_MOOD, that.moodbar, function() { // Callback is here in case of 404 on the moodBar
                     that.resetMoodbar();
                     error = true;
                 });
@@ -108,3 +122,5 @@ class TopBar extends MzkObject {
     getTopBar() { return this.topBar; }
 
 }
+
+export default TopBar

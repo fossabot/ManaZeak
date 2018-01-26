@@ -6,6 +6,10 @@
  *                                         *
  * * * * * * * * * * * * * * * * * * * * * */
 
+import { JSONParsedGetRequest } from '../../utils/Utils.js'
+import Notification from '../../utils/Notification.js'
+import View from '../../core/View.js'
+
 class UserView extends View {
 
     constructor() {
@@ -89,7 +93,7 @@ class UserView extends View {
 
             let admin                      = that.info.IS_ADMIN ? "Admin" : "User";
             that.ui.contentTitle.innerHTML = "General settings";
-            userInfo.innerHTML             = "<b>" + that.info.USER_NAME + "</b> (" + admin + ") <br><br>" +
+            userInfo.innerHTML             = "<b>" + that.info.USERNAME + "</b> (" + admin + ") <br><br>" +
                                              "User ID:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + that.info.INVITE_CODE + "<br>" +
                                              "Godfather:&nbsp;&nbsp;" + that.info.GODFATHER_NAME + " (" + that.info.GODFATHER_CODE + ")<br>" +
                                              "ManaCoin: " + that.info.MANACOIN + "<br><br>" +
@@ -120,13 +124,22 @@ class UserView extends View {
      **/
     _updateSettingsInfo(callback) {
         let that = this;
-        JSONParsedGetRequest(
-            "ajax/getUserSettings/",
+        JSONParsedGetRequest( // TODO : user the function in User class
+            "user/getSettings/",
             function(response) {
                 /* response = {
                  *     DONE      : bool
                  *     ERROR_H1  : string
                  *     ERROR_MSG : string
+                 *
+                 *     USERNAME:
+                 *     DATE_JOINED:
+                 *     LAST_LOGIN:
+                 *     INVITE_CODE:
+                 *     IS_ADMIN:
+                 *     MANACOIN:
+                 *     GODFATHER_CODE:
+                 *     GODFATHER_NAME:
                  * } */
                 if (response.DONE) {
                     that.info = response;
@@ -144,3 +157,5 @@ class UserView extends View {
     }
 
 }
+
+export default UserView

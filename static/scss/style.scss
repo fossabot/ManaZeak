@@ -39,5 +39,15 @@ html, body {
     position: absolute;
     top: 50px;
     width: 100%;
-}
 
+    & > .mzk-view {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+
+        &.mzk-view-hide {
+            z-index: -1;
+        }
+    }
+
+}
