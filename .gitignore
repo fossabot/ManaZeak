@@ -117,7 +117,10 @@ docker-compose.yml
 db_data
 
 *.mood
+
+### Script Compilation ###
 *.o
+scripts/bin/
 
 node_modules/
 static/js/dist/manazeak.bundle.js
