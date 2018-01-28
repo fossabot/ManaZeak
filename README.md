@@ -19,23 +19,16 @@ To install, refer to your distribution package manager.
 #### Installation
 
 
-In order to make an instance work, run the following commands :
+In order to make an instance work, run the following commands on a Linux system :
 - ```$ git clone https://github.com/Squadella/ManaZeak```
 - ```$ cd ManaZeak; cp docker-compose.yml.example docker-compose.yml```
 
 Open the newly created  ```docker-compose.yml``` and replace all ```/PATH/TO/LIBRARY``` inside it with the path of your musical collection root directory (absolute path). Also, replace ``/PATH/TO/DB_DATA`` with the path you want ManaZeak to save its database in (absolute path, please don't ``./db_data``). Then keep going with :
 
-- ```$ docker-compose build``` (This may take a while, go grab some coffee...)
-- ```$ docker-compose up -d```
+- ```$ ./mzk.sh init``` (This may take a while, go grab some coffee...)
+- ``$ ./mzk.sh dev`` or ``$ ./mzk.sh prod``
 
-You can now check that all containers have been launched correctly by using :
-- ```$ docker ps -a```
-
-Then, you must build the assets with [Webpack](https://github.com/webpack/webpack) :
-- ```npm install```
-- ```npm run prod``` (If you want to watch any changes on the files, use ``npm run dev``)
-
-Finally, if everything is OK with [Docker](https://github.com/docker) and with [Webpack](https://github.com/webpack/webpack), grab a browser and go to [127.0.0.1/](127.0.0.1/) (or a production address, but keep in mind that this is an experimental  software).
+If everything is OK with [Docker](https://github.com/docker) and with [Webpack](https://github.com/webpack/webpack), grab a browser and go to [127.0.0.1/](127.0.0.1/) (or a production address, but keep in mind that this is an experimental  software).
 
 #### Setup
 - You can now create an user : it will be an admin acount.
