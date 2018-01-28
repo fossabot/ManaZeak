@@ -33,6 +33,8 @@ When you make a pull request, first of all thank you! Please explain your featur
  *                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+import ObjectExample from './ObjectExample.js'
+
 // Class constant var
 
 class MyClass {
@@ -40,6 +42,7 @@ class MyClass {
     constructor(id, data) {
         this.id   = id;
         this.data = data;
+        this.obj  = new ObjectExample();        
         // Your constructor instructions
     }
 
@@ -87,6 +90,8 @@ class MyClass {
     setData(data) { this.data = data; }
 
 };
+
+export default MyClass
 ```
 
 #### Python3
