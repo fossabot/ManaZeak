@@ -23,6 +23,7 @@ class Modal extends MzkObject {
         this.callback    = null;
         this.closeButton = null;
         this.editTag     = null;
+        this.saveBlocker = false;
 
         this._createUI();
 
@@ -292,8 +293,11 @@ class Modal extends MzkObject {
             that.close();
         });
         del.addEventListener("click", function() {
-            window.app.deletePlaylist(that.data.playlist);
-            that.close();
+            if(!that.saveBlocker) {
+                that.saveBlocker = true;
+                window.app.deletePlaylist(that.data.playlist);
+                that.close();
+            }
         });
     }
 
@@ -320,8 +324,11 @@ class Modal extends MzkObject {
             that.close();
         });
         ui.save.addEventListener("click", function() {
-            that.editTag.saveState();
-            that.close();
+            if(!that.saveBlocker) {
+                that.saveBlocker = true;
+                that.editTag.saveState();
+                that.close();
+            }
         });
 
         this.editTag.getContainer().appendChild(ui.foot);
@@ -457,7 +464,10 @@ class Modal extends MzkObject {
 
         let that = this;
         scan.addEventListener("click", function() {
-            that._checkLibraryInputs(name, path, false);
+            if (!that.saveBlocker) {
+                that.saveBlocker = true;
+                that._checkLibraryInputs(name, path, false);
+            }
         });
     }
 
@@ -492,7 +502,10 @@ class Modal extends MzkObject {
 
         let that = this;
         create.addEventListener("click", function() {
-            that._checkPlaylistInputs(name);
+            if(!that.saveBlocker) {
+                that.saveBlocker = true;
+                that._checkPlaylistInputs(name);
+            }
         });
     }
 
@@ -525,29 +538,33 @@ class Modal extends MzkObject {
 
         let that = this;
         submit.addEventListener("click", function() {
-            if (wish.value !== '') {
-                // TODO : remove event listener on submit
-                JSONParsedPostRequest(
-                    "wish/submit/",
-                    JSON.stringify({
-                        WISH: wish.value
-                    }),
-                    function(response) {
-                        /* response = {
-                         *     DONE      : bool
-                         *     ERROR_H1  : string
-                         *     ERROR_MSG : string
-                         * } */
-                        if (!response.DONE) {
-                            new Notification("ERROR", response.ERROR_H1, response.ERROR_MSG);
-                        }
-                    }
-                );
-                that.close();
-            }
 
-            else {
-                new Notification("INFO", "Suggestion field is empty.", "You must specify something in the field.");
+            if(!that.saveBlocker) {
+                that.saveBlocker = true;
+                if (wish.value !== '') {
+                    // TODO : remove event listener on submit
+                    JSONParsedPostRequest(
+                        "wish/submit/",
+                        JSON.stringify({
+                            WISH: wish.value
+                        }),
+                        function (response) {
+                            /* response = {
+                            *     DONE      : bool
+                            *     ERROR_H1  : string
+                            *     ERROR_MSG : string
+                            * } */
+                            if (!response.DONE) {
+                                new Notification("ERROR", response.ERROR_H1, response.ERROR_MSG);
+                            }
+                        }
+                    );
+                    that.close();
+                }
+
+                else {
+                    new Notification("INFO", "Suggestion field is empty.", "You must specify something in the field.");
+                }
             }
         });
     }
@@ -621,7 +638,10 @@ class Modal extends MzkObject {
             that.close();
         });
         rename.addEventListener("click", function() {
-            that._checkPlaylistInputs(name);
+            if(!that.saveBlocker) {
+                that.saveBlocker = true;
+                that._checkPlaylistInputs(name);
+            }
         });
     }
 
@@ -719,12 +739,15 @@ class Modal extends MzkObject {
             that.close();
         });
         save.addEventListener('click', function() {
-            let rights = {};
-            for(let i = 0; i < boxContainer.children.length; ++i)
-                rights[boxContainer.children[i].firstChild.value] = boxContainer.children[i].firstChild.checked == true;
+            if(!that.saveBlocker) {
+                that.saveBlocker = true;
+                let rights = {};
+                for (let i = 0; i < boxContainer.children.length; ++i)
+                    rights[boxContainer.children[i].firstChild.value] = boxContainer.children[i].firstChild.checked == true;
 
-            window.app.changeGroup(that.data.GROUP.ID, name.value, rights);
-            that.close();
+                window.app.changeGroup(that.data.GROUP.ID, name.value, rights);
+                that.close();
+            }
         });
     }
 
@@ -784,8 +807,11 @@ class Modal extends MzkObject {
             that.close();
         });
         save.addEventListener('click', function() {
-            window.app.changeUserGroup(that.data.USER.USER_ID, selected.value, that.data.USER.NAME);
-            that.close();
+            if(!that.saveBlocker) {
+                that.saveBlocker = true;
+                window.app.changeUserGroup(that.data.USER.USER_ID, selected.value, that.data.USER.NAME);
+                that.close();
+            }
         });
     }
 
