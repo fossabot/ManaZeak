@@ -130,7 +130,7 @@ class PlaylistCollectionEntry {
     _createOptionButton() {
         let that               = this;
         // TODO : add admin options, or library options
-        this.options           = document.createElement("A");
+        this.options           = document.createElement("SPAN");
         this.options.className = "mzk-gear";
         this.options.addEventListener("mouseleave", function() {
             if (that.contextMenu) {
