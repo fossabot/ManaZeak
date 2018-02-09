@@ -85,6 +85,14 @@ $queue-margin:  5px;
                 flex-direction: column;
                 width:          5%;
             }
+
+            &:first-child + li .mzk-qprev-controls > img:first-child {
+                display: none;
+            }
+
+            &:last-child .mzk-qprev-controls > img:last-child {
+                display: none;
+            }
         }
     }
 
