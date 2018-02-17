@@ -20,8 +20,9 @@ class FootBar extends MzkObject {
         this.trackPreview    = new TrackPreview(this.footBar);
         this.controls        = new Controls(this.controlsContainer);
         this.progressBar     = new ProgressBar(this.controlsContainer);
-        this.playlistPreview = new PlaylistPreview(this.footBar);
         this.footBar.appendChild(this.controlsContainer);
+
+        this.playlistPreview = new PlaylistPreview(this.footBar);
         this._eventListener();
     }
 

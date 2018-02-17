@@ -56,32 +56,7 @@
             margin-top:    40px;
         }
 
-        ul {
-            list-style: none;
-            padding:    0;
-
-            li {
-                background-color: $mzk-bg-light;
-                border-radius:    5px;
-                margin-bottom:    15px;
-                padding:          $mzk-padding ($mzk-padding * 2);
-                position:         relative;
-                min-height:       38px;
-
-                img {
-                    cursor:   pointer;
-                    height:   30px;
-                    position: absolute;
-                    right:    10px;
-                    top:      10px;
-                    width:    auto;
-
-                    & + img {
-                        margin-right: 35px + $mzk-margin;
-                    }
-                }
-            }
-        }
+        @import '../../utils/modules/_buttonlist.scss';
 
         button {
             background: none;
@@ -115,22 +90,6 @@
         input:focus,
         input:hover {
             border-color: red;
-        }
-
-
-        .mzk-wish-entry {
-            button {
-                margin-bottom: 5px;
-                margin-top:    10px;
-                margin-right:  20px;
-            }
-
-            .mzk-accept:active,
-            .mzk-accept:focus,
-            .mzk-accept:hover {
-                border-color: green !important;
-                color:        green;
-            }
         }
     }
 }

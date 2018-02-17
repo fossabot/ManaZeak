@@ -34,7 +34,7 @@ class UserMenu {
         };
 
         this.ui.container.className = "mzk-user-expander";
-        this.ui.img.src             = "/static/img/controls/user.svg";
+        this.ui.img.src             = "/static/img/utils/user.svg";
 
         this.ui.container.appendChild(this.ui.img);
 
@@ -72,6 +72,10 @@ class UserMenu {
         }
         this.contextMenu.addEntry('logout', 'Log out', function() {
             window.app.logOut();
+        });
+
+        this.contextMenu.addEntry(null, "Batch", function() {
+            window.app.showAppView("mzk_batch");
         });
     }
 

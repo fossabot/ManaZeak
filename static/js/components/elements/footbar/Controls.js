@@ -11,11 +11,17 @@ import QueuePreview from './QueuePreview.js'
 
 class Controls  {
 
-    constructor(container, queuePreview, volumeBar) {
-        this._createUI(container, queuePreview, volumeBar);
-        if(queuePreview !== false)
+    constructor(container, toggles) {
+        if(Array.isArray(toggles) == false)
+            toggles = new Array(8).fill(true);
+        else
+            while(toggles.length < 8)
+                toggles.push(false);
+
+        this._createUI(container, toggles);
+        if(toggles[7])
             this.queuePreview = new QueuePreview(this.ui.queueExpander.button);
-        if(volumeBar !== false)
+        if(toggles[6])
             this.volumeBar    = new VolumeBar(this.container);
         this._eventListener();
     }
@@ -28,7 +34,7 @@ class Controls  {
      * desc   : Build UI elements
      * arg    : {object} container - The Controls container
      **/
-    _createUI(container, queuePreview, volumeBar) {
+    _createUI(container, toggles) {
         this.container = document.createElement("DIV");
         this.ui        = {
             play: {
@@ -87,16 +93,20 @@ class Controls  {
         this.ui.next.button.appendChild(this.ui.next.image);
         this.ui.queueExpander.button.appendChild(this.ui.queueExpander.image);
 
-        this.container.appendChild(this.ui.repeat.button);
-        this.container.appendChild(this.ui.shuffle.button);
-        this.container.appendChild(this.ui.previous.button);
-        this.container.appendChild(this.ui.play.button);
-        this.container.appendChild(this.ui.stop.button);
-        this.container.appendChild(this.ui.next.button);
-
-        if(queuePreview !== false) {
+        if(toggles[4])
+            this.container.appendChild(this.ui.repeat.button);
+        if(toggles[5])
+            this.container.appendChild(this.ui.shuffle.button);
+        if(toggles[2])
+            this.container.appendChild(this.ui.previous.button);
+        if(toggles[0])
+            this.container.appendChild(this.ui.play.button);
+        if(toggles[1])
+            this.container.appendChild(this.ui.stop.button);
+        if(toggles[3])
+            this.container.appendChild(this.ui.next.button);
+        if(toggles[7])
             this.container.appendChild(this.ui.queueExpander.button);
-        }
 
         container.appendChild(this.container);
     }

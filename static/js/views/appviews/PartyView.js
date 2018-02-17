@@ -20,7 +20,7 @@ class PartyView extends View {
         this._createUI();
         this._eventListener();
         this._startClock();
-        new Controls(this.ui.coverContainer, false, false);
+        new Controls(this.ui.coverContainer, [1, 1, 1, 1, 1, 1]);
     }
 
 //  --------------------------------  PUBLIC METHODS  ---------------------------------  //

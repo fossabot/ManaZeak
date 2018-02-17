@@ -79,6 +79,7 @@ class TrackPreview extends MzkObject {
             thumbTooltip:                document.createElement("SPAN")
         };
         this.tooltipWrapper            = document.createElement("DIV");
+        this.tooltipWrapperOutter      = document.createElement("DIV");
         this.listContainer             = document.createElement("UL");
 
         this.ui.container.className    = "mzk-track-preview";
@@ -88,13 +89,14 @@ class TrackPreview extends MzkObject {
         this.ui.thumbTooltip.appendChild(this.ui.thumb);
         this.tooltipWrapper.appendChild(this.ui.cover);
         this.tooltipWrapper.appendChild(this.ui.thumbTooltip);
+        this.tooltipWrapperOutter.appendChild(this.tooltipWrapper);
         this.ui.genreYear.appendChild(this.ui.year);
         this.ui.genreYear.appendChild(this.ui.genre);
         this.listContainer.appendChild(this.ui.title);
         this.listContainer.appendChild(this.ui.artist);
         this.listContainer.appendChild(this.ui.album);
         this.listContainer.appendChild(this.ui.genreYear);
-        this.ui.container.appendChild(this.tooltipWrapper);
+        this.ui.container.appendChild(this.tooltipWrapperOutter);
         this.ui.container.appendChild(this.listContainer);
 
         container.appendChild(this.ui.container);

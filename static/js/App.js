@@ -20,6 +20,7 @@ import Player   from './core/Player.js'
 import StatsView from './views/appviews/StatsView.js'
 import AdminView from './views/appviews/AdminView.js'
 import UserView from './views/appviews/UserView.js'
+import BatchView from './views/appviews/BatchView.js'
 import PartyView from './views/appviews/PartyView.js'
 import ListView from './views/ListView.js'
 import Playlist from './core/Playlist.js'
@@ -601,7 +602,6 @@ class App extends MzkObject {
 
         this._createDefaultViews();
         this.topBar  = new TopBar();
-        document.body.appendChild(this.mainContainer);
         this.footBar = new FootBar();
         document.body.appendChild(this.topBar.getTopBar());
         document.body.appendChild(this.mainContainer);
@@ -1171,6 +1171,7 @@ class App extends MzkObject {
         }
         this.createAppView('mzk_user', new UserView());
         this.createAppView('mzk_party', new PartyView());
+        this.createAppView('mzk_batch', new BatchView());
     }
 
 

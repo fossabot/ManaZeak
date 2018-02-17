@@ -9,11 +9,16 @@ $footbar-font-size:      0.8em;
     background-color: $mzk-bg-strong;
     flex:             0 0 $footbar-height;
     width:            100%;
+    height:           $footbar-height;
+
+    & > div {
+        width:     calc(#{$footbar-info-width} - #{$mzk-margin});
+        height:    100%;
+        font-size: $footbar-font-size;
+    }
 
     .mzk-controls-container {
-        height:              100%;
-        margin-left:         auto;
-        margin-right:        auto;
+        display:             inline-block;
         position:            relative;
         width:               $footbar-controls-width;
         -webkit-user-select: none;

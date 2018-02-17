@@ -29,9 +29,9 @@ class MultiSelect extends MzkObject {
      * class  : MultiSelect
      * desc   : TODO
      **/
-    add(value, append) {
+    add(value, append, keep) {
         if (append == false) {
-            if (this.size == 1 && this.selection[value] == true) {
+            if (this.size == 1 && this.selection[value] == true && keep != true) {
                 this.clear();
                 return false;
             }
@@ -46,14 +46,11 @@ class MultiSelect extends MzkObject {
 
         else {
             if (this.selection[value] != null) {
-                if (this.selection[value]) {
-                    this.selection[value] = false;
-                    --this.size;
-                }
-
-                else {
-                    this.selection[value] = true;
-                    ++this.size;
+                if(keep != true) {
+                    if (this.remove(value) == false) {
+                        this.selection[value] = true;
+                        ++this.size;
+                    }
                 }
             }
 
@@ -80,12 +77,23 @@ class MultiSelect extends MzkObject {
      * class  : MultiSelect
      * desc   : TODO
      **/
-    addBulk(values, append) {
+    addBulk(values, append, keep) {
         for (let i = 0; i < values.length; ++i) {
-            this.add(values[i], append | i != 0);
+            this.add(values[i], append | i != 0, keep);
         }
     }
 
+    /**
+     * TODO
+     */
+    remove(value) {
+        if(this.selection[value] == true) {
+            this.selection[value] = false;
+            --this.size;
+            return true;
+        }
+        return false;
+    }
 
     /**
      * method : clear (public)
