@@ -1,0 +1,17 @@
+.mzk-batchview {
+
+    .mzk-batch-header {
+        display: flex;
+        justify-content: center;
+    }
+
+    .mzk-batch-list {
+        @import "../../utils/modules/_buttonlist.scss";
+        ul {
+            li {
+                @import "../../components/elements/footbar/_trackpreview.scss";
+                @import "../../components/elements/footbar/_controls.scss";
+            }
+        }
+    }
+}
