@@ -74,7 +74,7 @@ class BatchView extends View {
 
     _fillBatchRoundOne() {
 
-        let imgPath = '/static/img/utils/adminview/';
+        let imgPath = '/static/img/controls/';
         let OKed = new MultiSelect();
         let KOed = new MultiSelect();
         for(let i = 0; i < 10; ++i) {
@@ -89,6 +89,7 @@ class BatchView extends View {
             accept.dataset.batchIx   = i;
             refuse.dataset.batchIx   = i;
 
+            content.className = "mzk-batch-content";
             accept.src = imgPath + "accepted.svg";
             refuse.src = imgPath + "refused.svg";
 

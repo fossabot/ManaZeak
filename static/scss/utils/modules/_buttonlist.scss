@@ -2,12 +2,12 @@
     display:         flex;
     justify-content: center;
 
-    ul {
+    & > ul {
         list-style: none;
         padding:    0;
         width: 80%;
 
-        li {
+        & > li {
             background-color: $mzk-bg-light;
             border-radius:    $mzk-border-radius;
             margin-bottom:    2 * $mzk-margin;

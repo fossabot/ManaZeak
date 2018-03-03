@@ -1,3 +1,5 @@
+$batch-item-height 150px;
+
 .mzk-batchview {
 
     .mzk-batch-header {
@@ -9,8 +11,22 @@
         @import "../../utils/modules/_buttonlist.scss";
         ul {
             li {
-                @import "../../components/elements/footbar/_trackpreview.scss";
-                @import "../../components/elements/footbar/_controls.scss";
+                height: $batch-item-height;
+
+                .mzk-batch-content {
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+
+                    @import "../../components/elements/footbar/_trackpreview.scss";
+                    .mzk-track-preview > div {
+                        height: $batch-item-height;
+                    }
+                    @import "../../components/elements/footbar/_controls.scss";
+                    .mzk-controls {
+                        flex: 1 0 auto;
+                    }
+                }
             }
         }
     }
