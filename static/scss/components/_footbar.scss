@@ -18,11 +18,18 @@ $footbar-font-size:      0.8em;
     }
 
     .mzk-controls-container {
-        display:             inline-block;
+        align-content:       space-evenly;
+        display:             inline-flex;
+        flex-wrap:           wrap;
         position:            relative;
         width:               $footbar-controls-width;
         -webkit-user-select: none;
         -moz-user-select:    none;
+        vertical-align:      top;
+
+        & > * {
+            width: 100%;
+        }
 
         @import './elements/footbar/controls';
     }
