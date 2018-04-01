@@ -45,6 +45,7 @@ urlpatterns = [
     url(r'^track/getMoodbar/$', track.getMoodbar, name='getMoodbarByID'),
     url(r'^track/getDetailedInfo/$', track.getTracksDetailedInfo, name='getTracksDetailedInfo'),
     url(r'^track/changeMetadata/$', editor.changeTracksMetadata, name='changeTracksMetadata'),
+    url(r'^track/getBuffer/$', editor.getBufferTracks, name='getBufferTracks'),
     url(r'^track/download/$', track.getDownloadLocation, name='getDownloadLocation'),
     url(r'^track/multiDownload/$', track.multiTrackDownload, name='multiTrackDownload'),
 
