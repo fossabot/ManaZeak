@@ -6,6 +6,7 @@
  *                                         *
  * * * * * * * * * * * * * * * * * * * * * */
 
+import Modal from '../../utils/Modal.js'
 import View from '../../core/View.js'
 import MultiSelect from '../../utils/MultiSelect.js'
 import Controls from '../../components/elements/footbar/Controls'
@@ -83,15 +84,19 @@ class BatchView extends View {
             let imgs    = document.createElement("DIV");
             let accept  = document.createElement("IMG");
             let refuse  = document.createElement("IMG");
+            let tagbtn  = document.createElement("IMG");
 
             accept.dataset.batchType = 'A';
             refuse.dataset.batchType = 'R';
+            tagbtn.dataset.batchType = 'T';
             accept.dataset.batchIx   = i;
             refuse.dataset.batchIx   = i;
+            tagbtn.dataset.batchIx   = i;
 
             content.className = "mzk-batch-content";
             accept.src = imgPath + "accepted.svg";
             refuse.src = imgPath + "refused.svg";
+            tagbtn.src = imgPath + "edit.svg";
 
             let tp = new TrackPreview(content);
             window.app.listen('changeTrack', function(track) {
@@ -99,6 +104,7 @@ class BatchView extends View {
             });
 
             new Controls(content, [1, 1]);
+            imgs.appendChild(tagbtn);
             imgs.appendChild(accept);
             imgs.appendChild(refuse);
             li.appendChild(content);
@@ -119,6 +125,9 @@ class BatchView extends View {
                 event.target.src = imgPath + (KOed.add(ix, true) ? "refused-true.svg" : "refused.svg");
                 OKed.remove(ix);
                 event.target.previousSibling.src = imgPath + "accepted.svg";
+            } else if(event.target.dataset.batchType == 'T') {
+                //debugger;
+                (new Modal("editTag", [window.app.activePlaylist.tracks[0]])).open();
             }
 
             that.ui.header.NB.innerHTML = OKed.getSize() + KOed.getSize();

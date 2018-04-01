@@ -19,19 +19,9 @@ import Modal from '../utils/Modal.js'
 class Playlist {
 
     constructor(id, name, isLibrary, isLoading, rawTracks, callback) { //TODO: get shuffle and repeat from server/cookies
-        if (typeof rawTracks !== 'undefined') { //TODO: fix this
-            this.rawTracks       = rawTracks;
-        }
-        else {
-            this.rawTracks       = [];
-        }
 
-        if (typeof callback !== 'undefined') {
-            this.callback        = callback;
-        }
-        else {
-            this.callback        = null;
-        }
+        this.rawTracks = rawTracks == null ? [] : rawTracks;
+        this.callback = callback;
 
         this.id                  = id;
         this.name                = name;
