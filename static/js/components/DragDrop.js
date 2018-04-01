@@ -9,6 +9,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import { JSONParsedPostRequest } from '../utils/Utils.js'
+import Notification from '../utils/Notification.js'
 
 class DragDrop {
 
@@ -46,13 +47,13 @@ class DragDrop {
             let files = event.dataTransfer.files;
             that.element.classList.remove('mzk-dragdrop-show');
 
-            let f;
             for (let i = 0; i < files.length; i++) {
-                f = files[i];
+                let f = files[i];
                 if (f.type == 'audio/flac' || f.type == 'audio/ogg' || (f.type == 'audio/mpeg' || f.type == 'audio/mp3')) {
                     let reader = new FileReader();
                     // This fires after the blob has been read/loaded.
                     reader.addEventListener('loadend', function(event) {
+                        console.log(f.name, event.target.result);
                         JSONParsedPostRequest(
                             "file/upload/",
                             JSON.stringify({
