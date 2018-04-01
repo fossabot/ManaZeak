@@ -3,6 +3,8 @@ import hashlib
 import json
 
 import os
+
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils.html import strip_tags
 from mutagen.flac import FLAC
@@ -10,6 +12,7 @@ from mutagen.id3 import ID3
 from mutagen.id3._frames import TIT2, TDRC, TPE1, TOPE, TCOM, TRCK, TBPM, USLT, TCON, TALB, COMM, TXXX, TPOS, APIC
 
 from app.models import Track, Artist, Album, Genre, Playlist
+from app.track.track import exportTrackInfo
 from app.utils import errorCheckMessage, checkPermission
 
 
@@ -231,6 +234,7 @@ def updateFileMetadata(track, tags):
 
 
 # Change a track or tracks metadata
+@login_required(redirect_field_name='login.html', login_url='app:login')
 def changeTracksMetadata(request):
     if request.method == 'POST':
         user = request.user
@@ -263,3 +267,20 @@ def changeTracksMetadata(request):
     else:
         data = errorCheckMessage(False, "badRequest")
     return JsonResponse(data)
+
+
+@login_required(redirect_field_name='login.html', login_url='app:login')
+def getBufferTracks(request):
+    if request.method == 'GET':
+        user = request.user
+        if checkPermission(["UPAP"], user):
+            tracks = Track.objects.filter(playlist=None)
+            data = []
+            for track in tracks:
+                data.append(exportTrackInfo(track))
+            response = dict({'RESULT': data})
+        else:
+            response = errorCheckMessage(False, "permissionError")
+    else:
+        response = errorCheckMessage(False, "badRequest")
+    return JsonResponse(response)
