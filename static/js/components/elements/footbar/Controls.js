@@ -11,7 +11,7 @@ import QueuePreview from './QueuePreview.js'
 
 class Controls  {
 
-    constructor(container, toggles) {
+    constructor(container, toggles, oneTrack) {
         if(Array.isArray(toggles) == false)
             toggles = new Array(8).fill(true);
         else
@@ -23,7 +23,7 @@ class Controls  {
             this.queuePreview = new QueuePreview(this.ui.queueExpander.button);
         if(toggles[6])
             this.volumeBar    = new VolumeBar(this.container);
-        this._eventListener();
+        this._eventListener(oneTrack);
     }
 
 //  --------------------------------  PRIVATE METHODS  --------------------------------  //
@@ -117,8 +117,21 @@ class Controls  {
      * class  : Controls
      * desc   : Controls event listeners
      **/
-    _eventListener() {
+    _eventListener(oneTrack)
+    {
         let that = this;
+
+        if(oneTrack != null)
+        {
+            this.ui.play.button.addEventListener("click", function() {
+                window.app.changeTrack(oneTrack);
+            });
+            this.ui.stop.button.addEventListener("click", function() {
+                window.app.stopPlayback();
+            });
+            return;
+        }
+
         this.ui.play.button.addEventListener("click", function() { window.app.togglePlay(); });
         this.ui.stop.button.addEventListener("click", function() { window.app.stopPlayback(); });
         this.ui.shuffle.button.addEventListener("click", function() { window.app.toggleShuffle(); });

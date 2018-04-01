@@ -273,7 +273,7 @@ class App extends MzkObject {
                 TRACK_ID:         track.id.track,
                 LAST_TRACK_PATH:  lastTrackPath,
                 TRACK_PERCENTAGE: isNaN(duration_played) ? 0 : duration_played,
-                PREVIOUS:         previous
+                PREVIOUS:         previous == true ? true : false
             }),
             function(response) {
                 /* response = {
