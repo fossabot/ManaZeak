@@ -8,7 +8,7 @@ from mutagen.id3 import ID3, ID3NoHeaderError
 from mutagen.mp3 import MP3, BitrateMode
 from mutagen.oggvorbis import OggVorbis
 
-from app.models import FileType
+from app.models import FileType, Track, Artist, Album, Genre
 from app.utils import processVorbisTag
 
 
@@ -300,23 +300,85 @@ def regenerateCover(track):
         track.save()
 
 
-# Tag a file in the comment section with the uploader name
-def setUploader(path, userName):
-    # Saving uploader for mp3 file since flac has no comment field
-    if path.endswith('.mp3'):
-        # Check if the file has a tag header
-        try:
-            audioTag = ID3(path)
-        except ID3NoHeaderError:
-            audioTag = ID3()
-        if 'COMM' not in audioTag:
-            audioTag.add('COMM')
-        audioTag['COMM'].text[0] = "Uploaded by : " + userName
-        audioTag.save()
-    if path.endswith('.flac'):
-        audioTag = FLAC(path)
-        audioTag['COMMENT'] = "Uploaded by : " + userName
-        audioTag.save()
+def importTrack(trackPath, user):
+    coverPath = "/ManaZeak/static/img/covers/"
+    if trackPath.endswith(".mp3"):
+        track = createMP3Track(trackPath, True, FileType.objects.get(name="mp3"), coverPath)
+    elif trackPath.endswith(".flac"):
+        track = createVorbisTrack(trackPath, FileType.objects.get(name="flac"), coverPath)
+    elif trackPath.endswith(".wav"):
+        track = createVorbisTrack(trackPath, FileType.objects.get(name="ogg"), coverPath)
+    else:
+        return
+    addSingleTrack(track, user)
+
+
+def addSingleTrack(localTrack, user):
+    track = Track()
+    # --- FILE INFORMATION --- #
+    track.location = localTrack.location
+    track.bitRate = localTrack.bitRate
+    track.duration = localTrack.duration
+    track.sampleRate = localTrack.sampleRate
+    track.bitRateMode = localTrack.bitRateMode
+
+    # --- FILE TAG --- #
+    track.title = localTrack.title
+    track.year = localTrack.year  # Date of Recording
+    track.number = localTrack.number
+    track.composer = localTrack.composer
+    track.performer = localTrack.performer
+    track.bpm = localTrack.bpm
+    track.comment = localTrack.comment
+    track.lyrics = localTrack.lyrics
+    track.coverLocation = localTrack.coverLocation
+    track.lyrics = localTrack.lyrics
+    track.moodbar = localTrack.moodbar
+    track.size = localTrack.size
+    track.fileType = FileType.objects.get(id=localTrack.fileType)
+
+    # Saving the track
+    track.save()
+
+    # Adding artist
+    artists = localTrack.artist
+    for artistName in artists:
+        artistName = artistName.lstrip()  # Remove useless spaces at the beginning
+        num_results = Artist.objects.filter(name=artistName).count()
+        if num_results == 0:  # The artist doesn't exist
+            artist = Artist()
+            artist.name = artistName
+            artist.save()
+        artist = Artist.objects.get(name=artistName)
+        track.artist.add(artist)
+
+    albumTitle = localTrack.album
+    if Album.objects.filter(title=albumTitle).count() == 0:  # If the album doesn't exist
+        album = Album()
+        album.title = albumTitle
+        album.numberTotalTrack = localTrack.totalTrack
+        album.numberOfDisc = localTrack.totalDisc
+        album.save()
+        for trackArtist in track.artist.all():
+            album.artist.add(trackArtist)
+    album = Album.objects.get(title=albumTitle)
+    # Check for each artist if he exists in the album
+    for trackArtist in track.artist.all():
+        if album.artist.filter(name=trackArtist.name).count() == 0:  # The Artist wasn't added
+            album.artist.add(trackArtist)
+            album.save()
+
+    genreName = localTrack.genre
+    if Genre.objects.filter(name=genreName).count() == 0:
+        genre = Genre()
+        genre.name = genreName
+        genre.save()
+    track.genre = Genre.objects.get(name=genreName)
+
+    track.album = album
+    track.uploader = user
+    track.save()
+
 
 
 class LocalTrack:
