@@ -321,11 +321,11 @@ class App extends MzkObject {
             //Force reflow
             window.requestAnimationFrame(function () {
                 window.requestAnimationFrame(function() {
-                    container.classList.remove('mzk-view-hide');
+                    view.fetchLatestData(function() { container.classList.remove('mzk-view-hide'); });
                 });
             });
         } else {
-            container.classList.remove('mzk-view-hide');
+            view.fetchLatestData(function() { container.classList.remove('mzk-view-hide'); });
         }
     }
 

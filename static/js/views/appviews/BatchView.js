@@ -11,12 +11,31 @@ import View from '../../core/View.js'
 import MultiSelect from '../../utils/MultiSelect.js'
 import Controls from '../../components/elements/footbar/Controls'
 import TrackPreview from '../../components/elements/footbar/TrackPreview'
+import {JSONParsedGetRequest} from "../../utils/Utils";
+import Track from "../../core/Track.js";
 
 class BatchView extends View {
 
     constructor() {
         super();
+
+        this.bufferTracks = [];
+
         this._createUI();
+    }
+
+    fetchLatestData(callback) {
+        var that = this;
+        JSONParsedGetRequest(
+            'track/getBuffer/',
+            function(response) {
+                that.bufferTracks = new Array(response.RESULT.length);
+                for(var i = response.RESULT.length; i--;)
+                    that.bufferTracks[i] = new Track(response.RESULT[i]);
+                that._fillBatchRoundOne();
+                callback();
+            }
+        );
     }
 
 //  --------------------------------  PRIVATE METHODS  --------------------------------  //
@@ -75,17 +94,14 @@ class BatchView extends View {
 
     _fillBatchRoundOne() {
 
+        this.ui.header.NB.innerHTML         = "0";
+        this.ui.header.TTL.innerHTML        = this.bufferTracks.length;
+
         let imgPath = '/static/img/controls/';
         let OKed = new MultiSelect();
         let KOed = new MultiSelect();
 
-        var pendingTracks = [];
-        window.setTimeout(function() {
-            for(var i = 0; i < 42; ++i)
-                pendingTracks[i] = window.app.activePlaylist.tracks[i];
-        }, 3000);
-
-        for(let i = 0; i < 42; ++i) {
+        for(let i = 0; i < this.bufferTracks.length; ++i) {
             let li      = document.createElement("LI");
             let content = document.createElement("DIV");
             let imgs    = document.createElement("DIV");
@@ -104,11 +120,8 @@ class BatchView extends View {
             accept.src = imgPath + "accepted.svg";
             refuse.src = imgPath + "refused.svg";
             tagbtn.src = imgPath + "edit.svg";
-
-            window.setTimeout(function() {
-                new TrackPreview(content, pendingTracks[i]);
-                new Controls(content, [1, 1], pendingTracks[i]);
-            }, 3000);
+            new TrackPreview(content, this.bufferTracks[i]);
+            new Controls(content, [1, 1], this.bufferTracks[i]);
 
             imgs.appendChild(tagbtn);
             imgs.appendChild(accept);
@@ -132,8 +145,7 @@ class BatchView extends View {
                 OKed.remove(ix);
                 event.target.previousSibling.src = imgPath + "accepted.svg";
             } else if(event.target.dataset.batchType == 'T') {
-                //debugger;
-                (new Modal("editTag", [pendingTracks[ix]])).open();
+                (new Modal("editTag", [that.bufferTracks[ix]])).open();
             }
 
             that.ui.header.NB.innerHTML = OKed.getSize() + KOed.getSize();

@@ -43,6 +43,17 @@ class View extends MzkObject{
         return null;
     }
 
+
+    /**
+     * method : fetchLatestData (public)
+     * class  : View
+     * desc   : Fetch data from the server and run the callback when ready
+     * arg    : {function} callback - The callback to run when everything is ready
+     **/
+    fetchLatestData(callback) {
+        callback();
+    }
+
 //  --------------------------------  PRIVATE METHODS  --------------------------------  //
 
     /**
