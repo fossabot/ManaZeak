@@ -70,7 +70,6 @@
                 width:       340px;
 
                 input {
-                    background:   transparent;
                     display:      inline-block;
                     font-size:    0.7em;
                     margin-left:  5px;
@@ -109,7 +108,6 @@
                         width:           100%;
 
                         input {
-                            background: transparent;
                             display:    inline-block;
                             height:     1em;
                             margin:     0 3px;
@@ -140,7 +138,6 @@
                 width:           100%;
 
                 input {
-                    background:    transparent;
                     display:       inline-block;
                     font-size:     0.7em;
                     margin-bottom: 15px;
@@ -166,24 +163,14 @@
                 width:       50%;
 
                 textarea {
-                    background:    transparent;
-                    border:        solid 1px $mzk-text !important;
                     border-radius: 2px;
                     box-sizing:    border-box;
-                    color:         $mzk-text !important;
                     font-size:     0.85em;
                     height:        100px;
                     margin-top:    5px;
                     padding:       5px;
                     resize:        none;
-                    transition:    0.2s ease;
                     width:         100%;
-                }
-
-                textarea:active,
-                textarea:hover,
-                textarea:focus {
-                    border: solid 1px $mzk-accent-color !important;
                 }
 
                 .mzk-center {
@@ -219,19 +206,6 @@
         p {
             font-size: 0.7em;
             margin:    0;
-        }
-
-        input {
-            border:        0;
-            border-bottom: solid 1px $mzk-text !important;
-            color:         $mzk-text;
-            transition:    0.2s ease;
-        }
-
-        input:active,
-        input:hover,
-        input:focus {
-            border-bottom: solid 1px $mzk-accent-color !important;
         }
     }
 }

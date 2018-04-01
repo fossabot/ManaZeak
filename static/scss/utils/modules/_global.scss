@@ -7,11 +7,13 @@ $mzk-bg-darker:       rgba(14, 15, 20, 1);
 $mzk-bg-alpha-darker: rgba(14, 15, 20, 0.66);
 $mzk-bg-alpha-black:  rgba(0, 0, 0, 0.8);
 // Text colors
-$mzk-text:       rgba(170, 170, 190, 1);
-$mzk-text-light: rgba(235, 235, 255, 1);
+$mzk-text:              rgba(170, 170, 190, 1);
+$mzk-text-light:        rgba(235, 235, 255, 1);
+$mzk-text-modified:     rgba(200, 200, 0, 1);
 // App colors
 $mzk-accent-color:      rgba(255, 0, 0, 0.8);
 $mzk-anti-accent-color: rgba(0, 0, 255, 0.8);
+$mzk-tri-accent-color:  rgba(0, 216, 0, 0.8);
 // Collection colors
 $mzk-collection-library:   rgba(255, 0, 0, 0.8);
 $mzk-collection-playlist:  rgba(0, 0, 255, 0.8);
@@ -37,20 +39,12 @@ input[type=password] {
     border:        0;
     border-bottom: solid $mzk-border-width $mzk-text;
     color:         $mzk-text;
+    outline:       0;
     padding:       $mzk-padding / 2;
     text-align:    center;
     transition:    $mzk-animation-duration;
 
-    &:active,
-    &:focus {
-        color: $mzk-text-light;
-    }
-
-    &:active,
-    &:focus,
-    &:hover {
-        border-bottom: solid 1px $mzk-text-light;
-    }
+    @extend .mzk-input-colour-scheme;
 }
 
 button {
@@ -61,15 +55,10 @@ button {
     border-radius: 6px;
     border:        solid 1px $mzk-text;
     cursor:        pointer;
+    outline:       0;
     transition:    $mzk-animation-duration;
 
-    &:active,
-    &:focus,
-    &:hover {
-        border:     solid 1px $mzk-text-light;
-        box-shadow: 0 0 1px $mzk-text-light;
-        color:      $mzk-text-light;
-    }
+    @extend .mzk-input-colour-scheme;
 }
 
 textarea {
@@ -79,15 +68,42 @@ textarea {
     box-sizing:    border-box;
     color:         $mzk-text;
     padding:       $mzk-padding / 2;
+    outline:       0;
     resize:        none;
     transition:    0.2s ease;
+
+    @extend .mzk-input-colour-scheme;
+}
+
+.mzk-input-colour-scheme {
+    &:active,
+    &:focus {
+        color: $mzk-text-light;
+    }
 
     &:active,
     &:focus,
     &:hover {
-        border:     solid 1px $mzk-text-light;
-        box-shadow: 0 0 1px $mzk-text-light;
-        color:      $mzk-text-light;
+        border-color: $mzk-text-light;
+    }
+
+    &.mzk-colour-input {
+        &.mzk-modified:not(:hover):not(:active):not(:focus) {
+            color: $mzk-text-modified;
+
+            &:placeholder-shown {
+                border-color: $mzk-text-modified;
+            }
+        }
+
+        &:hover {
+            border-color: $mzk-accent-color;
+        }
+
+        &:active,
+        &:focus {
+            border-color: $mzk-tri-accent-color;
+        }
     }
 }
 

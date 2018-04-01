@@ -12,12 +12,13 @@ import EditTagEntry from './entries/EditTagEntry.js'
 
 class EditTag {
 
-    constructor(container, data) {
+    constructor(container, data, isEdit) {
         this.data     = data;
         this.send     = [];
         this.entries  = [];
         this.selector = new MultiSelect();
         this.keepStr  = '< keep >';
+        this.isEdit   = isEdit == true;
 
         this._createUI(container);
         this._eventListener();
@@ -406,28 +407,28 @@ class EditTag {
         let tmp;
 
         let fields = {
-            cover: '',
-            title: '',
-            year: '',
-            composer: '',
-            performer: '',
-            track: '',
-            trackTotal: '',
-            disc: '',
-            discTotal: '',
-            lyrics: '',
-            comment: '',
-            album: '',
-            genre: '',
-            artist: '',
-            albumArtist: ''
+            cover:       { value: '', multiple: false, target: this.ui.lCover },
+            title:       { value: '', multiple: false, target: this.ui.cTitleInput },
+            year:        { value: '', multiple: false, target: this.ui.rYearNumber },
+            composer:    { value: '', multiple: false, target: this.ui.tagComposerField },
+            performer:   { value: '', multiple: false, target: this.ui.tagPerformerField },
+            track:       { value: '', multiple: false, target: this.ui.rTrackNumber },
+            trackTotal:  { value: '', multiple: false, target: this.ui.rTrackTotal },
+            disc:        { value: '', multiple: false, target: this.ui.rDiscNumber },
+            discTotal:   { value: '', multiple: false, target: this.ui.rDiscTotal },
+            lyrics:      { value: '', multiple: false, target: this.ui.lyrField },
+            comment:     { value: '', multiple: false, target: this.ui.comField },
+            album:       { value: '', multiple: false, target: this.ui.tagAlbumField },
+            genre:       { value: '', multiple: false, target: this.ui.tagGenreField },
+            artist:      { value: '', multiple: false, target: this.ui.cArtistInput },
+            albumArtist: { value: '', multiple: false, target: this.ui.tagAlbumArtistsField }
         };
 
         if (tracks[0]) {
             tmp = this.entries[tracks[0]].track;
 
             for (let f in fields) {
-                fields[f] = tmp[f];
+                fields[f].value = tmp[f];
             }
 
             //Show these infos when there is only one track selected;
@@ -451,29 +452,29 @@ class EditTag {
             tmp = this.entries[tracks[i]].track;
 
             for(let f in fields)
-                if(fields[f] != tmp[f])
-                    fields[f] = this.keepStr;
+                if(fields[f].value != tmp[f])
+                {
+                    fields[f].value    = this.isEdit == true ? tmp[f]: this.keepStr;
+                    fields[f].multiple = true;
+                }
         }
 
-        if(fields.cover == this.keepStr) //TODO: default image for <keep>
-            this.ui.lCover.src                 = 'FEAX_ZEAZ_PLEAZ';
-        else
-            this.ui.lCover.src                 = fields.cover;
+        for(let f in fields)
+        {
+            fields[f].target.value = fields[f].value;
+            fields[f].target.classList.add('mzk-colour-input');
+            if(this.isEdit) {
+                fields[f].target.placeholder = ' '; // Useful for CSS
+                if (fields[f].multiple == true)
+                    fields[f].target.classList.add('mzk-modified');
+            }
+        }
 
-        this.ui.cTitleInput.value          = fields.title;
-        this.ui.rYearNumber.value          = fields.year;
-        this.ui.tagComposerField.value     = fields.composer;
-        this.ui.tagPerformerField.value    = fields.performer;
-        this.ui.rTrackNumber.value         = fields.track;
-        this.ui.rTrackTotal.value          = fields.trackTotal;
-        this.ui.rDiscNumber.value          = fields.disc;
-        this.ui.rDiscTotal.value           = fields.discTotal;
-        this.ui.lyrField.value             = fields.lyrics;
-        this.ui.comField.value             = fields.comment;
-        this.ui.tagAlbumField.value        = fields.album;
-        this.ui.tagGenreField.value        = fields.genre;
-        this.ui.cArtistInput.value         = fields.artist;
-        this.ui.tagAlbumArtistsField.value = fields.albumArtist;
+        if(fields.cover.value == this.keepStr) //TODO: default image for <keep>
+            this.ui.lCover.src = 'FEAX_ZEAZ_PLEAZ';
+        else
+            this.ui.lCover.src = fields.cover.value;
+
     }
 
 //  ------------------------------  GETTERS / SETTERS  --------------------------------  //
