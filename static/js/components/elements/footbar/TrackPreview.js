@@ -11,10 +11,10 @@ import Modal from '../../../utils/Modal.js'
 
 class TrackPreview extends MzkObject {
 
-    constructor(container) {
+    constructor(container, track) {
         super();
         this._createUI(container);
-        this._eventListener();
+        this._eventListener(track);
     }
 
 //  --------------------------------  PUBLIC METHODS  ---------------------------------  //
@@ -108,7 +108,7 @@ class TrackPreview extends MzkObject {
      * class  : TrackPreview
      * desc   : TrackPreview event listeners
      **/
-    _eventListener() {
+    _eventListener(track) {
         this.ui.cover.addEventListener("click", function() {
             let modal = new Modal("cover", {
                 src:    that.ui.cover.src,
@@ -119,15 +119,19 @@ class TrackPreview extends MzkObject {
             modal.open();
         });
         let that = this;
-        window.app.listen('changeTrack', function(track) {
-            that.changeTrack(track);
-        });
-        window.app.listen("togglePlay", function() {
-            that._setVisible(true);
-        });
-        window.app.listen("stopPlayback", function() {
-            that._setVisible(false);
-        });
+
+        if(track == null) {
+            window.app.listen('changeTrack', function (track) {
+                that.changeTrack(track);
+            });
+            window.app.listen("togglePlay", function () {
+                that._setVisible(true);
+            });
+            window.app.listen("stopPlayback", function () {
+                that._setVisible(false);
+            });
+        } else
+            this.changeTrack(track);
     }
 
 

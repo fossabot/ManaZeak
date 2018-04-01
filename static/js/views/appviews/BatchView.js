@@ -78,7 +78,14 @@ class BatchView extends View {
         let imgPath = '/static/img/controls/';
         let OKed = new MultiSelect();
         let KOed = new MultiSelect();
-        for(let i = 0; i < 10; ++i) {
+
+        var pendingTracks = [];
+        window.setTimeout(function() {
+            for(var i = 0; i < 42; ++i)
+                pendingTracks[i] = window.app.activePlaylist.tracks[i];
+        }, 3000);
+
+        for(let i = 0; i < 42; ++i) {
             let li      = document.createElement("LI");
             let content = document.createElement("DIV");
             let imgs    = document.createElement("DIV");
@@ -98,12 +105,11 @@ class BatchView extends View {
             refuse.src = imgPath + "refused.svg";
             tagbtn.src = imgPath + "edit.svg";
 
-            let tp = new TrackPreview(content);
-            window.app.listen('changeTrack', function(track) {
-                tp.changeTrack(track);
-            });
+            window.setTimeout(function() {
+                new TrackPreview(content, pendingTracks[i]);
+                new Controls(content, [1, 1], pendingTracks[i]);
+            }, 3000);
 
-            new Controls(content, [1, 1]);
             imgs.appendChild(tagbtn);
             imgs.appendChild(accept);
             imgs.appendChild(refuse);
@@ -127,7 +133,7 @@ class BatchView extends View {
                 event.target.previousSibling.src = imgPath + "accepted.svg";
             } else if(event.target.dataset.batchType == 'T') {
                 //debugger;
-                (new Modal("editTag", [window.app.activePlaylist.tracks[0]])).open();
+                (new Modal("editTag", [pendingTracks[ix]])).open();
             }
 
             that.ui.header.NB.innerHTML = OKed.getSize() + KOed.getSize();
