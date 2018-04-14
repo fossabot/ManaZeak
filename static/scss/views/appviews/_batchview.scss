@@ -1,22 +1,30 @@
 $batch-item-height: 150px;
 
 .mzk-batchview {
+    display:        flex;
+    flex-direction: column;
+    height:         100%;
+    overflow:       hidden;
+    width:          100%;
 
     .mzk-batch-header {
-        display: flex;
+        display:         flex;
+        flex:            none;
         justify-content: center;
     }
 
     .mzk-batch-list {
+        overflow: auto;
+
         @import "../../utils/modules/_buttonlist.scss";
         ul {
             li {
                 height: $batch-item-height;
 
                 .mzk-batch-content {
-                    display: flex;
+                    display:        flex;
                     flex-direction: column;
-                    height: 100%;
+                    height:         100%;
 
                     @import "../../components/elements/footbar/_trackpreview.scss";
                     .mzk-track-preview > div {
