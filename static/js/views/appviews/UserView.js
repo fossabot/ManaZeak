@@ -96,8 +96,8 @@ class UserView extends View {
 
         this.ui.rescanLibLabel.innerHTML  = "<b>Remove my account</b><br>" +
                                                 "<br>" +
-                                                "Warning, this action will remove you from the database with all your data.<br>" +
-                                                "Are you sure you want to remove your account ?";
+                                                "Warning: this action will remove you from the database with all of your data.<br>" +
+                                                "Are you sure you want to delete your account?";
         this.ui.rescanLibButton.innerHTML = "DELETE MY ACCOUNT";
 
         this.ui.rescanLibButton.addEventListener("click", function() {

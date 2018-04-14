@@ -185,10 +185,10 @@ class AdminView extends View {
             "This command will erase existing covers and re-extract them for all tracks stored in the database.";
         this.ui.rmMoodLabel.innerHTML   = "<b>Remove all moodbars from server</b><br>" +
             "<br>" +
-            "ManaZeak perform a MoodBar scan on all tracks in the <code>/library/</code> folder every hour to generate the associated " +
-            "<code>.mood</code> file (if it doesn't exists already).<br>" +
-            "This command will erase all existing <code>.mood</code> file stored in the server. You might wait an hour or less before " +
-            "ManaZeak re-generate those <code>.mood</code> files.";
+            "ManaZeak performs a MoodBar scan on all tracks in the <code>/library/</code> folder every hour to generate the associated " +
+            "<code>.mood</code> file (if it doesn't exist already).<br>" +
+            "This command will erase all existing <code>.mood</code> files stored in the server. ManaZeak will re-generate the <code>.mood</code> " +
+            "files within an hour.";
         this.ui.dropLabel.innerHTML     = "<b>Drop database</b><br>" +
             "<br>" +
             "The server database stores data about users, libraries, playlists, tracks, artists, albums, genres, shuffle history, user history and statistics.<br>" +
@@ -359,7 +359,7 @@ class AdminView extends View {
         let status                     = this.info.INVITE_ENABLED ? "Enabled" : "Disabled";
         sponsoringLabel.innerHTML      = "<b>Sponsoring option on subscribe</b><br>" +
                                          "<br>" +
-                                         "When activated, any user that want to sign up needs to provide an ID from a user already signed in ManaZeak.<br>" +
+                                         "When activated, any user that wants to sign up needs to provide an ID from a user already signed up in ManaZeak.<br>" +
                                          "This command will add a field in the sign up form that is mandatory. <b>Sponsoring current status : " + status + "</b>";
         sponsoring.innerHTML           = this.info.INVITE_ENABLED ? "DISABLE SPONSORING" : "ENABLE SPONSORING";
         groupListTitle.innerHTML       = "<b>Group list</b>";
@@ -405,12 +405,12 @@ class AdminView extends View {
 
         this.ui.rescanLibLabel.innerHTML  = "<b>Rescan libraries</b><br>" +
                                             "<br>" +
-                                            "After you made modification on files located in a library folder, use this command to perform a rescan.<br>" +
+                                            "Use this command to perform a rescan after you've made modifications to files located in a library folder.<br>" +
                                             "This command will rescan all libraries in the database.";
         this.ui.rescanLibButton.innerHTML = "RESCAN ALL LIBRARIES";
         this.ui.rmLibLabel.innerHTML      = "<b>Remove libraries</b><br>" +
                                             "<br>" +
-                                            "In case of... Warning, this command apply to every user in ManaZeak.<br>" +
+                                            "Warning: this command applies to every user in ManaZeak.<br>" +
                                             "This command will erase all libraries in the database.";
         this.ui.rmLibButton.innerHTML     = "REMOVE ALL LIBRARIES";
         this.ui.libListLabel.innerHTML    = "<b>Library list</b>";
@@ -478,13 +478,13 @@ class AdminView extends View {
         this.ui.bufferField.value      = this.info.BUFFER_PATH;
         this.ui.apiKeyLabel.innerHTML  = "<b>SyncThing API key</b><br>" +
                                          "<br>" +
-                                         "In order to link ManaZeak with the SyncThing instance in the server, you must provide the SyncThing API key.<br>" +
-                                         "Please fill the following field with the key you can find on the SyncThing interface (use the OPEN button under).";
+                                         "In order to link ManaZeak to the SyncThing instance on the server, you must provide the SyncThing API key in the field below.<br>" +
+                                         "You can find the key in the SyncThing interface (use the OPEN button under).";
         this.ui.apiKeyButton.innerHTML = "SUBMIT";
         this.ui.bufferLabel.innerHTML  = "<b>Buffer path</b><br>" +
                                          "<br>" +
-                                         "The buffer folder is the one selected to upload file in.<br>" +
-                                         "Please fill the following field with the buffer path.";
+                                         "The buffer folder is the one selected to upload files in.<br>" +
+                                         "Please fill the following field in with the buffer path.";
         this.ui.bufferButton.innerHTML = "SUBMIT";
         this.ui.rescanLabel.innerHTML  = "<b>Rescan SyncThing folders</b><br>" +
                                          "<br>" +

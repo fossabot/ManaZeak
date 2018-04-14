@@ -92,7 +92,7 @@ class StatsView extends View {
         this._clearPageSpace();
 
         this.ui.menuArtist.className   = "mzk-selected";
-        this.ui.contentTitle.innerHTML = "Artists statistic";
+        this.ui.contentTitle.innerHTML = "Artist statistics";
 
         let artistsLeft                = document.createElement("DIV");
         let artistsRight               = document.createElement("DIV");
@@ -159,7 +159,7 @@ class StatsView extends View {
         this._clearPageSpace();
 
         this.ui.menuGenre.className    = "mzk-selected";
-        this.ui.contentTitle.innerHTML = "Genres statistic";
+        this.ui.contentTitle.innerHTML = "Genre statistics";
 
         let genresLeft                 = document.createElement("DIV");
         let genresRight                = document.createElement("DIV");
@@ -266,7 +266,7 @@ class StatsView extends View {
                     if (response.ERROR_H1 !== "null") {
                         prefTracksLabel.innerHTML      = "";
                         leastTracksLabel.innerHTML     = "";
-                        that.ui.contentTitle.innerHTML = "No stats yet to display about tracks. Use ManaZeak before going there!";
+                        that.ui.contentTitle.innerHTML = "No stats to display about tracks. Use ManaZeak before coming here!";
                     }
 
                     else {
