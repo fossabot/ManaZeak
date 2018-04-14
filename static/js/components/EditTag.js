@@ -23,7 +23,13 @@ class EditTag {
         this._createUI(container);
         this._eventListener();
 
-        this.selector.add(0); // Initializing modal with first track value
+        if(this.isEdit == true) {
+            this.editTrack = {};
+            for (let i = this.entries.length; i--;)
+                this.selector.add(i);
+        }
+        else
+            this.selector.add(0); // Initializing modal with first track value
     }
 
 //  --------------------------------  PUBLIC METHODS  ---------------------------------  //
@@ -111,7 +117,7 @@ class EditTag {
             this.entries[i] = new EditTagEntry(this.ui.list, this.data[i]);
         }
 
-        if(this.data.length > 1) {
+        if(this.data.length > 1 && this.isEdit == false) {
             container.style = "display: flex;";
             container.appendChild(this.ui.list);
             this.ui.container.style += "display: inline;";
@@ -404,28 +410,32 @@ class EditTag {
     _updateFields() {
 
         let tracks = this.selector.get();
-        let tmp;
+        let deleteLabel = document.createElement('LABEL');
+        let deleteImg = document.createElement('IMG');
+        deleteImg.src = '/static/img/controls/close.svg';
+        deleteLabel.appendChild(deleteImg);
+        let that = this;
 
         let fields = {
-            cover:       { value: '', multiple: false, target: this.ui.lCover },
-            title:       { value: '', multiple: false, target: this.ui.cTitleInput },
-            year:        { value: '', multiple: false, target: this.ui.rYearNumber },
-            composer:    { value: '', multiple: false, target: this.ui.tagComposerField },
-            performer:   { value: '', multiple: false, target: this.ui.tagPerformerField },
-            track:       { value: '', multiple: false, target: this.ui.rTrackNumber },
-            trackTotal:  { value: '', multiple: false, target: this.ui.rTrackTotal },
-            disc:        { value: '', multiple: false, target: this.ui.rDiscNumber },
-            discTotal:   { value: '', multiple: false, target: this.ui.rDiscTotal },
-            lyrics:      { value: '', multiple: false, target: this.ui.lyrField },
-            comment:     { value: '', multiple: false, target: this.ui.comField },
-            album:       { value: '', multiple: false, target: this.ui.tagAlbumField },
-            genre:       { value: '', multiple: false, target: this.ui.tagGenreField },
-            artist:      { value: '', multiple: false, target: this.ui.cArtistInput },
-            albumArtist: { value: '', multiple: false, target: this.ui.tagAlbumArtistsField }
+            cover:       { value: '', multiple: null, target: this.ui.lCover },
+            title:       { value: '', multiple: null, target: this.ui.cTitleInput },
+            year:        { value: '', multiple: null, target: this.ui.rYearNumber },
+            composer:    { value: '', multiple: null, target: this.ui.tagComposerField },
+            performer:   { value: '', multiple: null, target: this.ui.tagPerformerField },
+            track:       { value: '', multiple: null, target: this.ui.rTrackNumber },
+            trackTotal:  { value: '', multiple: null, target: this.ui.rTrackTotal },
+            disc:        { value: '', multiple: null, target: this.ui.rDiscNumber },
+            discTotal:   { value: '', multiple: null, target: this.ui.rDiscTotal },
+            lyrics:      { value: '', multiple: null, target: this.ui.lyrField },
+            comment:     { value: '', multiple: null, target: this.ui.comField },
+            album:       { value: '', multiple: null, target: this.ui.tagAlbumField },
+            genre:       { value: '', multiple: null, target: this.ui.tagGenreField },
+            artist:      { value: '', multiple: null, target: this.ui.cArtistInput },
+            albumArtist: { value: '', multiple: null, target: this.ui.tagAlbumArtistsField }
         };
 
         if (tracks[0]) {
-            tmp = this.entries[tracks[0]].track;
+            let tmp = this.entries[tracks[0]].track;
 
             for (let f in fields) {
                 fields[f].value = tmp[f];
@@ -449,25 +459,66 @@ class EditTag {
         }
 
         for(let i = 1; i < tracks.length; ++i) {
-            tmp = this.entries[tracks[i]].track;
+            let tmp = this.entries[tracks[i]].track;
 
-            for(let f in fields)
-                if(fields[f].value != tmp[f])
-                {
-                    fields[f].value    = this.isEdit == true ? tmp[f]: this.keepStr;
-                    fields[f].multiple = true;
+            for(let f in fields) {
+                if (tmp[f] != null && fields[f].value != tmp[f]) {
+                    fields[f].value = this.isEdit == true ? tmp[f] : this.keepStr;
+                    fields[f].multiple = tmp;
                 }
+            }
         }
 
         for(let f in fields)
         {
-            fields[f].target.value = fields[f].value;
-            fields[f].target.classList.add('mzk-colour-input');
             if(this.isEdit) {
                 fields[f].target.placeholder = ' '; // Useful for CSS
-                if (fields[f].multiple == true)
-                    fields[f].target.classList.add('mzk-modified');
+
+                // Add the user's modification on top of the modification stack
+                if(this.editTrack[f] != null) {
+                    fields[f].value = this.editTrack[f];
+                    fields[f].multiple = this.editTrack;
+                }
+
+                fields[f].target.removeEventListener("input");
+                fields[f].target.addEventListener("input", function() {
+                    that.editTrack[f] = this.value;
+                    this.classList.remove('mzk-modified');
+                });
+
+                if (fields[f].multiple != null) {
+                    if(fields[f].multiple != this.editTrack)
+                        fields[f].target.classList.add('mzk-modified');
+
+                    // Wrap in the label to add the close image
+                    if (fields[f].target.parentNode.tagName != "LABEL") {
+                        let label = deleteLabel.cloneNode(true);
+                        fields[f].target.parentNode.replaceChild(label, fields[f].target);
+                        label.appendChild(fields[f].target);
+                    }
+                    // Add the image eventListener
+                    fields[f].target.parentNode.removeEventListener();
+                    fields[f].target.parentNode.addEventListener("click", function(event) {
+                        if(event.target.tagName == "IMG") {
+                            console.log(fields[f].multiple.title);
+                            if(that.editTrack[f] != null)
+                                that.editTrack[f] = null;
+                            else
+                                fields[f].multiple[f] = null;
+                            that._updateFields();
+                        }
+                    });
+                } else {
+                    fields[f].target.classList.remove('mzk-modified');
+                    // Remove the label wrapper
+                    if (fields[f].target.parentNode.tagName == "LABEL") {
+                        fields[f].target.parentNode.parentNode.replaceChild(fields[f].target, fields[f].target.parentNode);
+                    }
+                }
             }
+
+            fields[f].target.value = fields[f].value;
+            fields[f].target.classList.add('mzk-colour-input');
         }
 
         if(fields.cover.value == this.keepStr) //TODO: default image for <keep>

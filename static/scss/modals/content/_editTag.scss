@@ -56,10 +56,25 @@
                 padding:    15px;
                 width:      130px;
 
-                img {
-                    cursor: pointer;
-                    height: 100px;
-                    width:  100px;
+                & > label, img {
+                    cursor:   pointer;
+                    display:  block;
+                    height:   100px;
+                    position: relative;
+                    width:    100px;
+
+                    &.mzk-modified {
+                        border: 1px solid $mzk-text-modified;
+                    }
+
+                    & > img:first-child {
+                        height:   25%;
+                        margin:   3px;
+                        position: absolute;
+                        right:    0;
+                        width:    auto;
+                        z-index:  1;
+                    }
                 }
             }
 
@@ -69,13 +84,26 @@
                 height:      130px;
                 width:       340px;
 
-                input {
+                form > input, form > label {
                     display:      inline-block;
                     font-size:    0.7em;
                     margin-left:  5px;
                     padding-left: 5px;
+                    position:     relative;
                     text-align:   left;
                     width:        320px;
+
+                    // below is only for labels, since inputs cna't have children
+                    img {
+                        height:   80%;
+                        position: absolute;
+                        right:    0;
+                    }
+
+                    input {
+                        width: 100%;
+                        text-align: left;
+                    }
                 }
 
                 p {
@@ -107,12 +135,24 @@
                         padding-right:   15px;
                         width:           100%;
 
-                        input {
+                        form > input, form > label {
                             display:    inline-block;
                             height:     1em;
                             margin:     0 3px;
+                            position:   relative;
                             text-align: center;
                             width:      15px;
+
+                            // below is only for labels, since inputs cna't have children
+                            img {
+                                height:   80%;
+                                position: absolute;
+                                right:    0;
+                            }
+
+                            input {
+                                width: 100%;
+                            }
                         }
 
                         .mzk-year {
@@ -137,12 +177,25 @@
                 padding:         0 15px;
                 width:           100%;
 
-                input {
+                form > input, form > label {
                     display:       inline-block;
                     font-size:     0.7em;
                     margin-bottom: 15px;
+                    position:      relative;
                     text-align:    left;
                     width:         570px;
+
+                    // below is only for labels, since inputs cna't have children
+                    img {
+                        height:   80%;
+                        position: absolute;
+                        right:    0;
+                    }
+
+                    input {
+                        width: 100%;
+                        text-align: left;
+                    }
                 }
 
                 .mzk-no-margin {
@@ -162,15 +215,33 @@
                 text-align:  center;
                 width:       50%;
 
-                textarea {
+                form > textarea {
+                    padding: 5px;
+                }
+
+                form > textarea, form > label {
                     border-radius: 2px;
                     box-sizing:    border-box;
+                    display:       block;
                     font-size:     0.85em;
                     height:        100px;
                     margin-top:    5px;
-                    padding:       5px;
+                    position:      relative;
                     resize:        none;
                     width:         100%;
+
+                    // below is only for labels, since inputs cna't have children
+                    img {
+                        height:   25%;
+                        margin:   3px;
+                        position: absolute;
+                        right:    0;
+                    }
+
+                    textarea {
+                        height: 100%;
+                        width:  100%;
+                    }
                 }
 
                 .mzk-center {
