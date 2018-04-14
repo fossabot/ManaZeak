@@ -100,6 +100,7 @@ class BatchView extends View {
         let imgPath = '/static/img/controls/';
         let OKed = new MultiSelect();
         let KOed = new MultiSelect();
+        let emptyTrack = new Track({});
 
         for(let i = 0; i < this.bufferTracks.length; ++i) {
             let li      = document.createElement("LI");
@@ -145,7 +146,7 @@ class BatchView extends View {
                 OKed.remove(ix);
                 event.target.previousSibling.src = imgPath + "accepted.svg";
             } else if(event.target.dataset.batchType == 'T') {
-                (new Modal("editTag", [that.bufferTracks[ix]])).open();
+                (new Modal("editTag", [emptyTrack, that.bufferTracks[ix]])).open();
             }
 
             that.ui.header.NB.innerHTML = OKed.getSize() + KOed.getSize();
