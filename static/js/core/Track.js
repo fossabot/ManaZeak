@@ -26,6 +26,9 @@ class Track extends MzkObject{
      * arg    : {object} track - Raw JSON track
      **/
     updateMetadata(track) {
+        if(track.ALBUM == null)
+            track.ALBUM = {};
+
         this.id = {
             track:          track.ID                ? track.ID                : "",
             album:          track.ALBUM.ID          ? track.ALBUM.ID          : "",
