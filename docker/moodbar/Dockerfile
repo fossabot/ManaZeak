@@ -8,6 +8,7 @@ RUN apk add --update \
     fftw \
     fftw-dev \
     gstreamer0.10-dev \
+    gst-plugins-bad0.10 \
     gst-plugins-ugly0.10 \
     gst-plugins-base0.10 \
     gst-plugins-good0.10 \

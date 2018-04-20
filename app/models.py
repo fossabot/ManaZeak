@@ -57,6 +57,24 @@ class Track(models.Model):
     uploader = models.ForeignKey(User, null=True)
 
 
+class TrackSuggestion(models.Model):
+    coverLocation = models.URLField(max_length=1000, null=True)
+    title = models.CharField(max_length=1000)
+    year = models.IntegerField(null=True)
+    composer = models.CharField(max_length=1000, null=True)
+    performer = models.CharField(max_length=1000, null=True)
+    number = models.IntegerField(null=True)
+    bpm = models.IntegerField(null=True)
+    lyrics = models.CharField(max_length=42000, null=True)
+    comment = models.CharField(max_length=10000, null=True)
+    discNumber = models.IntegerField(null=True)
+    artist = models.CharField(max_length=10000, null=True)
+    album = models.CharField(max_length=10000, null=True)
+    genre = models.CharField(max_length=10000, null=True)
+    trackReference = models.ForeignKey(Track)
+    user = models.ForeignKey(User)
+
+
 class Playlist(models.Model):
     name = models.CharField(max_length=1000)
     user = models.ForeignKey(User)

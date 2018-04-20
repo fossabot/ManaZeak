@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 from app.consts import BUBBLE_PERCENTAGE
-from app.models import UserHistory, UserPreferences, TransactionHistory, TransactionType
+from app.models import UserHistory, UserPreferences, TransactionHistory, TransactionType, Wallet
 
 
 # Calculate the available cash
@@ -25,6 +25,12 @@ def checkListeningGain(track, user):
                     userPref.save()
                     for _ in range(0, int(round(count))):
                         createTransaction("PLAY", user, True, 1)
+
+
+def rewardTrackSuggestion(tagsAccepted, user, isGain):
+    # Create a transaction for each accepted tag.
+    for i in range(0, tagsAccepted):
+        createTransaction("TAGE", user, isGain, 1)
 
 
 def calculateStreak(user, transaction):
