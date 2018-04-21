@@ -70,6 +70,8 @@ class TrackSuggestion(models.Model):
     discNumber = models.IntegerField(null=True)
     artist = models.CharField(max_length=10000, null=True)
     album = models.CharField(max_length=10000, null=True)
+    albumTotalTrack = models.IntegerField(null=True)
+    albumTotalDisc = models.IntegerField(null=True)
     genre = models.CharField(max_length=10000, null=True)
     trackReference = models.ForeignKey(Track)
     user = models.ForeignKey(User)

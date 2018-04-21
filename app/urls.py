@@ -4,6 +4,7 @@ from app import player, history, adminTools, wish, userSettings, fileUpload, use
 from app.collection import playlist, library
 from app.stats import stats, suggestion
 from app.track import track, editor
+from app.track.tagSugestions import tagSuggestions
 from . import views
 
 app_name = 'app'
@@ -48,6 +49,10 @@ urlpatterns = [
     url(r'^track/getBuffer/$', editor.getBufferTracks, name='getBufferTracks'),
     url(r'^track/download/$', track.getDownloadLocation, name='getDownloadLocation'),
     url(r'^track/multiDownload/$', track.multiTrackDownload, name='multiTrackDownload'),
+
+    # Tag suggestions actions
+    url(r'^stagSuggestion/getAll/$', tagSuggestions.getAllSuggestions, name='getAllTagSuggestions'),
+    url(r'^tagSuggestion/accept/$', tagSuggestions.applySuggestion, name='applyTagSuggestion'),
 
     # Stats actions
     url(r'^stats/adminGetUserStats/$', stats.adminGetUserStats, name='adminGetUserStats'),  # TODO : Implement in front

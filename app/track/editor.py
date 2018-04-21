@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from django.utils.html import strip_tags
 
 from app.models import Track, Artist, Album, Genre, Playlist
-from app.track.suggestion import createTrackSuggestion, Information, updateFileMetadata
+from app.track.tagSugestions.tagSuggestions import createTrackSuggestion, Information, updateFileMetadata
 from app.track.track import exportTrackInfo
 from app.utils import errorCheckMessage, checkPermission
 
@@ -96,14 +96,17 @@ def updateDBInfo(response, track, user):
         tagsChanged += 1
 
     if 'GENRE' in response and response['GENRE'] != '':
-        tags.trackGenre = strip_tags(response['GENRE']).lstrip().rstrip()
-        if Genre.objects.filter(name=tags.trackGenre).count() == 0:
+        changed = False
+        genreName = strip_tags(response['GENRE']).lstrip().rstrip()
+        if Genre.objects.filter(name=genreName).count() == 0:
             genre = Genre()
-            genre.name = tags.trackGenre
+            genre.name = genreName
             genre.save()
-        genre = Genre.objects.get(name=tags.trackGenre)
-        if track.genre.name != tags.trackGenre:
+            changed = True
+        genre = Genre.objects.get(name=genreName)
+        if track.genre != genre or changed:
             track.genre = genre
+            tags.trackGenre = genreName
             tagsChanged += 1
 
     if 'COVER' in response:
@@ -124,25 +127,38 @@ def updateDBInfo(response, track, user):
                         track.coverLocation = md5Name.hexdigest() + extension
                     tagsChanged += 1
 
-    if 'ALBUM_TITLE' in response and 'ALBUM_ARTISTS' in response and response['ALBUM_TITLE'] != '' \
-            and response['ALBUM_ARTISTS'] != '':
+    if 'ALBUM_TITLE' in response and 'ALBUM_ARTISTS' in response:
         tags.albumTitle = strip_tags(response['ALBUM_TITLE']).lstrip().rstrip()
         tags.albumArtist = strip_tags(response['ALBUM_ARTISTS']).lstrip().rstrip().split(',')
+
+        changed = False
         if Album.objects.filter(title=tags.albumTitle).count() == 0:
             album = Album()
             album.title = tags.albumTitle
             album.save()
+            changed = True
         album = Album.objects.get(title=tags.albumTitle)
+        if album.title != tags.albumTitle or changed:
+            tagsChanged += 1
+
+        albumArtists = album.artist.all()
         album.artist.clear()
+        changed = False
         for artist in tags.albumArtist:
             if Artist.objects.filter(name=artist).count() == 0:
                 newArtist = Artist()
                 newArtist.name = artist
                 newArtist.save()
-            album.artist.add(Artist.objects.get(name=artist))
+            artist = Artist.objects.get(name=artist)
+            album.artist.add(artist)
+            if artist not in albumArtists:
+                changed = True
+        if changed:
+            tagsChanged += 1
 
-        if 'ALBUM_TOTAL_DISC' in response and response[
-            'ALBUM_TOTAL_DISC'] != '' and album.totalDisc != checkIntValueError(response['ALBUM_TOTAL_DISC']):
+        print("tot disc", checkIntValueError(response['ALBUM_TOTAL_DISC']), " - ", album.totalDisc)
+        if 'ALBUM_TOTAL_DISC' in response and response['ALBUM_TOTAL_DISC'] != '' \
+                and album.totalDisc != checkIntValueError(response['ALBUM_TOTAL_DISC']):
             tags.albumTotalDisc = checkIntValueError(response['ALBUM_TOTAL_DISC'])
             album.totalDisc = tags.albumTotalDisc
             tagsChanged += 1
@@ -153,14 +169,13 @@ def updateDBInfo(response, track, user):
             track.discNumber = tags.albumDiscNumber
             tagsChanged += 1
 
-        if 'ALBUM_TOTAL_TRACK' in response and response[
-            'ALBUM_TOTAL_TRACK'] != '' and album.totalTrack != checkIntValueError(response['ALBUM_TOTAL_TRACK']):
+        if 'ALBUM_TOTAL_TRACK' in response \
+                and response['ALBUM_TOTAL_TRACK'] != '' \
+                and album.totalTrack != checkIntValueError(response['ALBUM_TOTAL_TRACK']):
             tags.albumTotalTrack = checkIntValueError(response['ALBUM_TOTAL_TRACK'])
             album.totalTrack = tags.albumTotalTrack
             tagsChanged += 1
         album.save()
-        if album.title != tags.albumTitle:
-            tagsChanged += 1
         track.album = album
     track.save()
     print(tagsChanged)
@@ -247,7 +262,7 @@ def changeTracksMetadata(request):
                     if Track.objects.filter(id=trackId).count() == 1:
                         track = Track.objects.get(id=trackId)
 
-                        # If the user can't edit tag
+                        # If the user can edit tag
                         if checkPermission(["TAGE"], user):
                             # Updating database information
                             tags = updateDBInfo(response, track, user)
@@ -263,6 +278,7 @@ def changeTracksMetadata(request):
                             tags = createTrackInformation(response)
                             createTrackSuggestion(tags, track, user)
                             data = errorCheckMessage(False, "badFormat")
+
                         else:
                             data = errorCheckMessage(False, "permissionError")
                     else:

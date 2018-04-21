@@ -6,10 +6,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils.html import strip_tags
 from mutagen.flac import FLAC
-from mutagen.id3 import ID3
+from mutagen.id3 import ID3, ID3NoHeaderError
 from mutagen.id3._frames import TIT2, TDRC, TPE1, TOPE, TCOM, TRCK, TBPM, USLT, TCON, TALB, TXXX, COMM, TPOS, APIC
 
-from app.models import TrackSuggestion, Artist, Genre
+from app.models import TrackSuggestion, Artist, Genre, Album
+from app.track.tagSugestions.utils import checkIfAllFields, updateSuggestionBeforeAccept
 from app.utils import checkPermission, errorCheckMessage
 
 
@@ -41,7 +42,10 @@ class Information:
 def updateFileMetadata(track, tags):
     if track.location.endswith(".mp3"):
         # Check if the file has a tag header
-        audioTag = ID3()
+        try:
+            audioTag = ID3(track.location)
+        except ID3NoHeaderError:
+            audioTag = ID3()
         if tags.trackTitle is not None:
             audioTag.add(TIT2(text=tags.trackTitle))
         if tags.trackYear is not None:
@@ -169,6 +173,12 @@ def createTrackSuggestion(trackInformation, track, user):
         if trackInformation.albumTitle is not None:
             trackSuggestion.album = trackInformation.albumTitle
 
+        if trackInformation.albumTotalTrack is not None:
+            trackSuggestion.albumTotalTrack = trackInformation.albumTotalTrack
+
+        if trackInformation.albumTotalDisc is not None:
+            trackSuggestion.albumTotalDisc = trackInformation.albumTotalDisc
+
         # Saving the track to database
         trackSuggestion.save()
         data = errorCheckMessage(True, None)
@@ -186,13 +196,21 @@ def applySuggestion(request):
         response = json.loads(request.body)
         user = request.user
         if checkPermission(['TAGE'], user):
-            if 'SUGGESTION_ID' in response:
-                suggestionId = strip_tags(response['SUGGESTION_ID'])
-                if TrackSuggestion.objects.find(id=suggestionId, user=user).count() == 1:
-                    trackSuggestion = TrackSuggestion.objects.get(id=suggestionId)
-                    data = updateTrackFromSuggestion(trackSuggestion, user)
+            # Checking if the request is complete
+            if checkIfAllFields(response):
+                if 'SUGGESTION_ID' in response:
+                    suggestionId = strip_tags(response['SUGGESTION_ID'])
+                    # Getting the track suggestion
+                    if TrackSuggestion.objects.find(id=suggestionId, user=user).count() == 1:
+                        trackSuggestion = TrackSuggestion.objects.get(id=suggestionId)
+                        # Remove the fields not accepted by the reviewer
+                        updateSuggestionBeforeAccept(response, trackSuggestion)
+                        # Update the database and the track itself
+                        data = updateTrackFromSuggestion(trackSuggestion, user)
+                    else:
+                        data = errorCheckMessage(False, "dbError")
                 else:
-                    data = errorCheckMessage(False, "dbError")
+                    data = errorCheckMessage(False, "badFormat")
             else:
                 data = errorCheckMessage(False, "badFormat")
         else:
@@ -259,15 +277,25 @@ def updateTrackFromSuggestion(trackSuggestion, user):
         # Checking if the suggestion contained artists
         if len(trackSuggestion.artist) > 0:
             artists = []
+            artistsChanged = False
+            trackArtists = track.artist.all()
             for artist in trackSuggestion.artist:
                 # Create the artist if he doesn't exists
                 if Artist.objects.find(name=artist).count() == 0:
                     artist = Artist()
                     artist.name = artist
                     artist.save()
-                    artists.append(artist)
-                    tags.trackArtist.append()
-            track.artist = artists
+                trackArtist = Artist.objects.get(name=artist)
+                artists.append(trackArtist)
+                # Cheking if the artist isn't already set for the track
+                if trackArtist not in trackArtists:
+                    artistsChanged = True
+                tags.trackArtist += artist + ", "
+            # Removing the last 2 chars
+            tags.trackArtist = tags.trackArtist[:-2]
+            if artistsChanged:
+                tagsAccepted += 1
+                track.artist = artists
 
         if trackSuggestion.genre is not None:
             genreName = trackSuggestion.genre
@@ -275,9 +303,43 @@ def updateTrackFromSuggestion(trackSuggestion, user):
                 genre = Genre()
                 genre.name = genreName
                 genre.save()
-                tags.trackGenre = genreName
             genre = Genre.objects.get(name=genreName)
-            track.genre = genre
+            # If the the genre hasn't been changed
+            if track.genre != genre:
+                tagsAccepted += 1
+                track.genre = genre
+                tags.trackGenre = genreName
+
+        # Album tags
+        if trackSuggestion.album is not None:
+            albumName = trackSuggestion.album
+            if Album.objects.find(name=albumName).count() == 0:
+                album = Album()
+                album.title = albumName
+                album.save()
+            album = Album.objects.get(title=albumName)
+            if track.album == album:
+                track.album = album
+                tags.albumTitle = albumName
+
+        album = track.album
+        if trackSuggestion.albumTotalDisc is not None and album.totalDisc != trackSuggestion.albumTotalDisc:
+            album.totalDisc = trackSuggestion.albumTotalDisc
+            tags.albumTotalDisc = trackSuggestion.albumTotalDisc
+            tagsAccepted += 1
+
+        if trackSuggestion.albumTotalTrack is not None and album.totalTrack != trackSuggestion.albumTotalTrack:
+            album.totalTrack = trackSuggestion.albumTotalTrack
+            tags.albumTotalTrack = trackSuggestion.albumTotalTrack
+            tagsAccepted += 1
+
+        if trackSuggestion.discNumber is not None and trackSuggestion.discNumber != track.discNumber:
+            track.discNumber = trackSuggestion.discNumber
+            tags.albumDiscNumber = trackSuggestion.discNumber
+            tagsAccepted += 1
+
+        album.save()
+        track.album = album
 
         track.save()
 
@@ -290,3 +352,40 @@ def updateTrackFromSuggestion(trackSuggestion, user):
     else:
         data = errorCheckMessage(False, "dbError")
     return data
+
+
+# Return the list of all the suggestions
+@login_required(redirect_field_name='login.html', login_url='app:login')
+def getAllSuggestions(request):
+    if request.method == 'GET':
+        user = request.user
+        if checkPermission(['TAGE'], user):
+            suggestions = []
+            for trackSuggestion in TrackSuggestion.objects.all():
+                suggestions.append(getSuggestionInfo(trackSuggestion))
+            data = {**errorCheckMessage(True, None), **dict({'RESULT': suggestions})}
+        else:
+            data = errorCheckMessage(False, "permissionError")
+    else:
+        data = errorCheckMessage(False, "badRequest")
+    return JsonResponse(data)
+
+
+def getSuggestionInfo(trackSuggestion):
+    return {
+        'TITLE': trackSuggestion.title,
+        'ARTISTS': trackSuggestion.artist,
+        'PERFORMER': trackSuggestion.performer,
+        'COMPOSER': trackSuggestion.composer,
+        'YEAR': trackSuggestion.year,
+        'TRACK_NUMBER': trackSuggestion.number,
+        'BPM': trackSuggestion.bpm,
+        'LYRICS': trackSuggestion.lyrics,
+        'COMMENT': trackSuggestion.comment,
+        'GENRE': trackSuggestion.genre,
+        'COVER': trackSuggestion.coverLocation,
+        'ALBUM_TITLE': trackSuggestion.album,
+        'ALBUM_TOTAL_DISC': trackSuggestion.albumTotalDisc,
+        'DISC_NUMBER': trackSuggestion.discNumber,
+        'ALBUM_TOTAL_TRACK': trackSuggestion.albumTotalTrack,
+    }
