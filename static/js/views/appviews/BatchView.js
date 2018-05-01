@@ -56,7 +56,8 @@ class BatchView extends View {
                 NB:        document.createElement("SPAN"),
                 separator: document.createElement("SPAN"),
                 TTL:       document.createElement("SPAN"),
-                postTTL:   document.createElement("SPAN")
+                postTTL:   document.createElement("SPAN"),
+                OKHand:    document.createElement("IMG")
             },
             list: {
                 container: document.createElement("DIV"),
@@ -72,12 +73,14 @@ class BatchView extends View {
         this.ui.header.separator.innerHTML  = " / ";
         this.ui.header.TTL.innerHTML        = "42";
         this.ui.header.postTTL.innerHTML    = " )";
+        this.ui.header.OKHand.src           = "/static/img/controls/close.svg";
 
         this.ui.header.title.appendChild(this.ui.header.preNB);
         this.ui.header.title.appendChild(this.ui.header.NB);
         this.ui.header.title.appendChild(this.ui.header.separator);
         this.ui.header.title.appendChild(this.ui.header.TTL);
         this.ui.header.title.appendChild(this.ui.header.postTTL);
+        this.ui.header.title.appendChild(this.ui.header.OKHand);
         this.ui.header.container.appendChild(this.ui.header.title);
 
         this.ui.list.container.appendChild(this.ui.list.ul);

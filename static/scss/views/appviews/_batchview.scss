@@ -1,4 +1,5 @@
 $batch-item-height: 150px;
+$batch-header-height: 2em;
 
 .mzk-batchview {
     display:        flex;
@@ -11,6 +12,23 @@ $batch-item-height: 150px;
         display:         flex;
         flex:            none;
         justify-content: center;
+
+        h1 {
+            position: relative;
+            margin: $mzk-margin;
+            height: $batch-header-height;
+            font-size: $batch-header-height;
+
+            span {
+                line-height: $batch-header-height;
+            }
+
+            img {
+                height: 100%;
+                position: absolute;
+                margin-left: $mzk-margin;
+            }
+        }
     }
 
     .mzk-batch-list {
