@@ -6,7 +6,7 @@
  *                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import { getCookies, JSONParsedGetRequest, JSONParsedPostRequest, getRequest } from './utils/Utils.js'
+import { getCookies, setCookie, JSONParsedGetRequest, JSONParsedPostRequest, getRequest } from './utils/Utils.js'
 import FootBar  from './components/FootBar.js'
 import MzkObject from './core/MzkObject.js'
 import TopBar   from './components/TopBar.js'
@@ -21,17 +21,20 @@ import StatsView from './views/appviews/StatsView.js'
 import AdminView from './views/appviews/AdminView.js'
 import UserView from './views/appviews/UserView.js'
 import BatchView from './views/appviews/BatchView.js'
+import HelpCenterView from './views/appviews/HelpCenterView.js'
 import PartyView from './views/appviews/PartyView.js'
 import ListView from './views/ListView.js'
 import Playlist from './core/Playlist.js'
 import Notification from './utils/Notification.js'
 import Modal from './utils/Modal.js'
+import SearchBar from './components/SearchBar.js'
 
 class App extends MzkObject {
 
     constructor(callback) {
         super();
         this.cookies                 = getCookies();
+        this.cookieTimeout           = null;
         this.dragdrop                = new DragDrop(document.body);
         this.mainContainer           = document.createElement("DIV");
         this.mainContainer.className = "mzk-main-container";
@@ -44,6 +47,8 @@ class App extends MzkObject {
         this.cssFiles                = {};
         this.appViews                = {};
         this.shortcutMaestro         = new ShortcutMaestro();
+        this.search                  = null;
+        this.isSearchUp              = false;
         this.availableViews          = {
             LIST: {
                 index: 0,
@@ -266,14 +271,14 @@ class App extends MzkObject {
             lastTrackPath   = "None";
         }
 
-        let duration_played = (this.player.getCurrentTime() * 100) / this.player.getDuration();
+        let durationPlayed = (this.player.getCurrentTime() * 100) / this.player.getDuration();
         JSONParsedPostRequest(
             "track/getPath/",
             JSON.stringify({
                 TRACK_ID:         track.id.track,
                 LAST_TRACK_PATH:  lastTrackPath,
-                TRACK_PERCENTAGE: isNaN(duration_played) ? 0 : duration_played,
-                PREVIOUS:         previous == true ? true : false
+                TRACK_PERCENTAGE: isNaN(durationPlayed) ? 0 : durationPlayed,
+                PREVIOUS:         previous
             }),
             function(response) {
                 /* response = {
@@ -612,13 +617,14 @@ class App extends MzkObject {
             "playlist/fetchAll/",
             function(response) {
                 /* response = {
-                 *     DONE                : bool
-                 *     ERROR_H1            : string
-                 *     ERROR_MSG           : string
+                 *     DONE                  : bool
+                 *     ERROR_H1              : string
+                 *     ERROR_MSG             : string
                  *
-                 *     PLAYLIST_IDS        : int[] / undefined
-                 *     PLAYLIST_NAMES      : string[] / undefined
-                 *     PLAYLIST_IS_LIBRARY : bool[] / undefined
+                 *     PLAYLIST_IDS          : int[] / undefined
+                 *     PLAYLIST_NAMES        : string[] / undefined
+                 *     PLAYLIST_DESCRIPTIONS : string[] / undefined
+                 *     PLAYLIST_IS_LIBRARY   : bool[] / undefined
                  * } */
                 that._appStart(response); // Response is tested in _appStart
             }
@@ -829,7 +835,7 @@ class App extends MzkObject {
         }
 
         let that = this;
-        let np = new Playlist(0, null, false, false, undefined, function() {
+        let np = new Playlist(0, null, '', false, false, undefined, function() {
             that.playlists.add(np);
             that.changePlaylist(np.id);
             if(callback)
@@ -850,7 +856,7 @@ class App extends MzkObject {
         }
 
         let that = this;
-        let nl = new Playlist(0, null, true, false, undefined, function() {
+        let nl = new Playlist(0, null, '', true, false, undefined, function() {
             that.playlists.add(nl);
             that.changePlaylist(nl.id);
             if(callback)
@@ -913,6 +919,9 @@ class App extends MzkObject {
      **/
     setVolume(volume) {
         this.player.setVolume(volume);
+
+        window.clearTimeout(this.cookieTimeout);
+        this.cookieTimeout = window.setTimeout(setCookie("MZK_VOLUME", volume, 20), 250);
     }
 
 
@@ -1112,6 +1121,7 @@ class App extends MzkObject {
             for (let i = 0; i < playlists.PLAYLIST_IDS.length; ++i) {
                 that.playlists.add(new Playlist(playlists.PLAYLIST_IDS[i],
                     playlists.PLAYLIST_NAMES[i],
+                    playlists.PLAYLIST_DESCRIPTIONS[i],
                     playlists.PLAYLIST_IS_LIBRARY[i],
                     true,
                     undefined,
@@ -1122,6 +1132,8 @@ class App extends MzkObject {
             defPlaylist.getPlaylistsTracks(function() {
                 modal.close();
                 that.changePlaylist(that.playlists.getDefault().id);
+                that.search = new SearchBar();
+                that._searchListener();
                 that.playlists.forEach(function() {
                     this.getPlaylistsTracks();
                 }, false);
@@ -1170,6 +1182,7 @@ class App extends MzkObject {
             this.createAppView('mzk_stats', new StatsView());
         }
         this.createAppView('mzk_user', new UserView());
+        this.createAppView('mzk_help', new HelpCenterView());
         this.createAppView('mzk_party', new PartyView());
         this.createAppView('mzk_batch', new BatchView());
     }
@@ -1194,6 +1207,16 @@ class App extends MzkObject {
         this.addShortcut(new Shortcut('keydown', 'ArrowDown', function() { that.adjustVolume(-0.01); }, true));
     }
 
+
+    _searchListener() {
+        let that = this;
+        document.body.addEventListener('keyup', function(event) {
+            let inputCode = String.fromCharCode(event.keyCode);
+            if (/[a-zA-Z0-9-_\[\]]/.test(inputCode) && !that.search.getVisible()) {
+                that.search.show(event.key, that.activePlaylist.tracks); //TODO Replace with getter
+            }
+        });
+    }
 }
 
 export default App

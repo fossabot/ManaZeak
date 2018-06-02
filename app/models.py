@@ -29,7 +29,7 @@ class FileType(models.Model):
 
 
 class Track(models.Model):
-    location = models.FilePathField(max_length=1000)
+    location = models.FilePathField(max_length=1000, unique=True)
     coverLocation = models.URLField(max_length=1000, null=True)
     title = models.CharField(max_length=1000)
     year = models.IntegerField(null=True)
@@ -84,6 +84,7 @@ class Playlist(models.Model):
     isLibrary = models.BooleanField(default=False)
     isScanned = models.BooleanField(default=False)
     refreshView = models.BooleanField(default=True)
+    description = models.CharField(default="", max_length=10000)
 
 
 class Library(models.Model):
@@ -182,6 +183,13 @@ class Groups(models.Model):
     permissions = models.ManyToManyField(Permissions)
 
 
+class Achievement(models.Model):
+    reward = models.IntegerField()
+    isHidden = models.BooleanField(default=True)
+    code = models.CharField(max_length=10, unique=True)
+    user = models.ManyToManyField(User)
+
+
 class UserPreferences(models.Model):
     inviteCode = models.ForeignKey(InviteCode, null=True)
     wallet = models.ForeignKey(Wallet, null=True)
@@ -189,4 +197,4 @@ class UserPreferences(models.Model):
     user = models.ForeignKey(User, null=True)
     totalListeningTime = models.FloatField(default=0.0)
     streak = models.IntegerField(default=100)
-
+    picture = models.FilePathField(default='/defaultimgpath')

@@ -33,6 +33,11 @@ def rewardTrackSuggestion(tagsAccepted, user, isGain):
         createTransaction("TAGE", user, isGain, 1)
 
 
+# Create the transaction for a wish
+def rewardWish(user, isGain):
+    createTransaction("WISH", user, isGain, 1)
+
+
 def calculateStreak(user, transaction):
     userPref = UserPreferences.objects.get(user=user)
     if transaction.isGain:
@@ -100,3 +105,10 @@ def createTransaction(code, user, isGain, multiplier):
             if userPref.inviteCode.user is not None:
                 bubbleTransaction(amount, isGain, userPref.inviteCode.user)
     calculateStreak(user, transaction)
+
+
+def rewardAchievement(user, achievement):
+    achievement.user.add(user)
+    userPref = UserPreferences.objects.get(user=user)
+    wallet = userPref.wallet
+    wallet.globalGain += achievement.reward
